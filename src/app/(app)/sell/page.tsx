@@ -1,5 +1,11 @@
 import { requireUser } from "@/server/auth/session";
 import { listSellerListings } from "@/server/services/listing.service";
+import {
+  listActivePlatforms,
+  listPayablePlans,
+  pendingRequestFor,
+} from "@/server/services/payment.service";
+import { describePlan } from "@/server/services/payment.rules";
 import { EmptyState, PageHeading } from "@/components/ui/Primitives";
 import { CreateListingForm } from "./CreateListingForm";
 import { SellListingCard } from "./SellListingCard";
@@ -13,7 +19,46 @@ function shortDate(date: Date) {
 
 export default async function SellPage() {
   const user = await requireUser();
-  const listings = await listSellerListings(user.id);
+  const [listings, unlockPlans, boostPlans, platforms] = await Promise.all([
+    listSellerListings(user.id),
+    listPayablePlans("seller_chat_unlock"),
+    listPayablePlans("boost"),
+    listActivePlatforms(),
+  ]);
+
+  const toOption = (plan: (typeof unlockPlans)[number]) => ({
+    id: plan.id,
+    label: plan.label,
+    description: describePlan({
+      category: plan.category,
+      label: plan.label,
+      price: plan.price,
+      creditsGranted: plan.creditsGranted,
+      boostDays: plan.boostDays,
+    }),
+    price: plan.price,
+    qrImageUrl: plan.qrImageUrl,
+    qrUpiId: plan.qrUpiId,
+  });
+
+  const platformOptions = platforms.map((platform) => ({
+    id: platform.id,
+    name: platform.name,
+    logoUrl: platform.logoUrl,
+    utrTerm: platform.utrTerm,
+    appTxnTerm: platform.appTxnTerm,
+    explanatoryImageUrl: platform.explanatoryImageUrl,
+  }));
+
+  // A listing with a payment already waiting shows that instead of a pay button.
+  const pendingByListing = new Map<string, { unlock: boolean; boost: boolean }>();
+  for (const listing of listings) {
+    const [unlock, boost] = await Promise.all([
+      pendingRequestFor(user.id, "listing_unlock", listing.id),
+      pendingRequestFor(user.id, "listing_boost", listing.id),
+    ]);
+    pendingByListing.set(listing.id, { unlock: Boolean(unlock), boost: Boolean(boost) });
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -35,6 +80,11 @@ export default async function SellPage() {
           {listings.map((listing) => (
             <li key={listing.id}>
               <SellListingCard
+                unlockPlans={unlockPlans.map(toOption)}
+                boostPlans={boostPlans.map(toOption)}
+                platforms={platformOptions}
+                pendingUnlock={pendingByListing.get(listing.id)?.unlock ?? false}
+                pendingBoost={pendingByListing.get(listing.id)?.boost ?? false}
                 listing={{
                   id: listing.id,
                   courseText: listing.courseText,

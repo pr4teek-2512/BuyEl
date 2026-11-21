@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import Link from "next/link";
 import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { openChatAction } from "./actions";
@@ -35,7 +36,10 @@ export function ChatButton({
 
       {state.status === "no_credits" ? (
         <p className="max-w-[12rem] text-right text-xs text-danger">
-          No credits left. Buying credits arrives with the payment step.
+          No credits left.{" "}
+          <Link href="/payments" className="font-medium underline">
+            Buy credits
+          </Link>
         </p>
       ) : state.status === "error" ? (
         <p className="max-w-[12rem] text-right text-xs text-danger">{state.error}</p>

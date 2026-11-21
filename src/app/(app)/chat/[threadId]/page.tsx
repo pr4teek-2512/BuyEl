@@ -3,9 +3,15 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
 import { requireUser } from "@/server/auth/session";
 import { ChatError, getConversation } from "@/server/services/chat.service";
+import {
+  listActivePlatforms,
+  listPayablePlans,
+  pendingRequestFor,
+} from "@/server/services/payment.service";
+import { describePlan } from "@/server/services/payment.rules";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Primitives";
+import { PayAction } from "@/components/payment/PayAction";
 import { Conversation } from "./Conversation";
 
 export const metadata = { title: "Conversation - BuyEl" };
@@ -26,7 +32,15 @@ export default async function ConversationPage({
     throw error;
   }
 
-  const { view, role, messages, waitingMessageCount } = conversation;
+  const { view, role, messages, waitingMessageCount, listingId } = conversation;
+
+  const [unlockPlans, platforms, pendingUnlock] = view.locked
+    ? await Promise.all([
+        listPayablePlans("seller_chat_unlock"),
+        listActivePlatforms(),
+        pendingRequestFor(user.id, "listing_unlock", listingId),
+      ])
+    : [[], [], null];
 
   return (
     <div className="flex flex-col gap-4">
@@ -61,10 +75,36 @@ export default async function ConversationPage({
               Unlock chat for this listing to read and reply. You only pay once per listing.
             </p>
           </div>
-          <Button disabled title="Paid unlock arrives with the payment step.">
-            <Lock className="size-4" />
-            Unlock chat
-          </Button>
+          <PayAction
+            label="Unlock chat"
+            title="Unlock chat for this listing"
+            icon={<Lock className="size-4" />}
+            size="md"
+            plans={unlockPlans.map((plan) => ({
+              id: plan.id,
+              label: plan.label,
+              description: describePlan({
+                category: plan.category,
+                label: plan.label,
+                price: plan.price,
+                creditsGranted: plan.creditsGranted,
+                boostDays: plan.boostDays,
+              }),
+              price: plan.price,
+              qrImageUrl: plan.qrImageUrl,
+              qrUpiId: plan.qrUpiId,
+            }))}
+            platforms={platforms.map((platform) => ({
+              id: platform.id,
+              name: platform.name,
+              logoUrl: platform.logoUrl,
+              utrTerm: platform.utrTerm,
+              appTxnTerm: platform.appTxnTerm,
+              explanatoryImageUrl: platform.explanatoryImageUrl,
+            }))}
+            listingId={listingId}
+            pending={Boolean(pendingUnlock)}
+          />
         </Card>
       ) : (
         <Conversation threadId={threadId} initialMessages={messages} />

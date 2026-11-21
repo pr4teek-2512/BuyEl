@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Field";
 import { Badge, Card } from "@/components/ui/Primitives";
 import { cn } from "@/lib/cn";
+import { PayAction } from "@/components/payment/PayAction";
+import type {
+  PaymentPlanOption,
+  PaymentPlatformOption,
+} from "@/components/payment/PaymentDialog";
 import { listingActionHandler, updatePriceAction } from "./actions";
 import { initialSellState } from "./state";
 
@@ -37,7 +42,21 @@ function PendingButton({
   );
 }
 
-export function SellListingCard({ listing }: { listing: SellerListingView }) {
+export function SellListingCard({
+  listing,
+  unlockPlans,
+  boostPlans,
+  platforms,
+  pendingUnlock,
+  pendingBoost,
+}: {
+  listing: SellerListingView;
+  unlockPlans: PaymentPlanOption[];
+  boostPlans: PaymentPlanOption[];
+  platforms: PaymentPlatformOption[];
+  pendingUnlock: boolean;
+  pendingBoost: boolean;
+}) {
   const [priceState, savePrice] = useActionState(updatePriceAction, initialSellState);
   const [actionState, runAction] = useActionState(listingActionHandler, initialSellState);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -120,25 +139,27 @@ export function SellListingCard({ listing }: { listing: SellerListingView }) {
                 </PendingButton>
               </form>
             ) : (
-              <Button
-                size="sm"
-                disabled
-                title="Paid unlock arrives with the payment step. Chat must be unlocked before a listing can be closed."
-              >
-                <Lock className="size-4" />
-                Unlock chat
-              </Button>
+              <PayAction
+                label="Unlock chat"
+                title="Unlock chat for this listing"
+                icon={<Lock className="size-4" />}
+                plans={unlockPlans}
+                platforms={platforms}
+                listingId={listing.id}
+                pending={pendingUnlock}
+              />
             )}
 
-            <Button
-              size="sm"
+            <PayAction
+              label={listing.isBoosted ? "Extend boost" : "Boost"}
+              title={listing.isBoosted ? "Extend this boost" : "Boost this listing"}
+              icon={<Zap className="size-4" />}
               variant="secondary"
-              disabled
-              title="Paid boost arrives with the payment step."
-            >
-              <Zap className="size-4" />
-              Boost
-            </Button>
+              plans={boostPlans}
+              platforms={platforms}
+              listingId={listing.id}
+              pending={pendingBoost}
+            />
           </>
         ) : (
           <form action={runAction}>

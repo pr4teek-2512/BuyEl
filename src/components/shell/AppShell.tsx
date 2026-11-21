@@ -42,13 +42,14 @@ export function AppHeader({
         </Link>
 
         <div className="flex items-center gap-2">
-          <span
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-soft px-3 text-sm font-semibold text-brand"
-            title="Your in-app currency"
+          <Link
+            href="/payments"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-soft px-3 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
+            title="Your in-app currency. Tap to buy more."
           >
             {user.creditBalance}
             <span className="text-xs font-medium">credits</span>
-          </span>
+          </Link>
 
           <details className="relative">
             <summary className="flex size-9 cursor-pointer list-none items-center justify-center rounded-full border border-line text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
