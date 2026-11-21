@@ -16,7 +16,9 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Planning complete, no application code written yet.
+Phases 0 and 1 are written. `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean.
+Nothing has touched a database yet: the client's Supabase project is `hpdanwmpzmviamplunqa` and
+the connection string has not been shared, so no migration and no seed has run.
 
 Delivered this session:
 - Extracted and read the full PRD, including all six embedded reference screenshots
@@ -26,6 +28,17 @@ Delivered this session:
   the ten rule ordering engine, screen inventory, nine phase roadmap, testing strategy,
   non functional targets, and 25 open questions.
 - `TASKS.md`: phase by phase task board with blocked items mapped to question numbers.
+- Next.js 16 app scaffolded in the repo root: Tailwind v4 white theme with a violet accent,
+  UI kit (Button, TextField, ComboBox, Avatar, Card, Badge, EmptyState, Skeleton), responsive
+  shell with a desktop top nav and a mobile bottom bar, credit balance and a bell limited to the
+  latest 6 notifications.
+- Full Prisma schema for every module in the PRD (22 models), validated and generating.
+- Phone and OTP authentication: bcrypt hashed codes, 5 minute expiry, DB backed rate limits,
+  JWT access plus rotating refresh in httpOnly cookies, test account fixed OTP bypass, a single
+  server action state machine for phone to OTP to profile, and sign out.
+- Master list service implementing all of PRD section 16, including the three admin actions.
+- Seed script: Indian UG and PG branch list, owner admin account, the four payment platforms.
+- Public landing page.
 
 ## Approach and strategy
 
@@ -64,6 +77,16 @@ Delivered this session:
 4. Locked seller chat: the buyer experience is **identical** whether or not the seller has unlocked
    chat. No warning, no block, no refund. The seller just cannot read or reply until they unlock.
 
+## Decisions taken while building
+
+| Decision | Reasoning |
+|---|---|
+| Prisma 7 with the `@prisma/adapter-pg` driver adapter | Prisma 7 no longer ships the Rust query engine, so an adapter is required |
+| Rate limiting in Postgres instead of Upstash Redis | Removes a third party service and an account to manage; OTP volumes are far below what a table can handle |
+| One server action state machine for the whole sign in flow | No duplicated client state and no effects, which also satisfies the React 19 lint rules |
+| APITxt driven by a URL template in the env file | Their request shape is not publicly documented, so the exact URL can be dropped in with no code change |
+| Colleges and courses seeded empty, branches pre seeded | Owner confirmed on 2026-11-21 |
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -77,9 +100,8 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 0: scaffold the Next.js app, Tailwind white theme, UI kit, responsive shell with the
-   mobile bottom nav, Prisma and Supabase wiring.
-2. Phase 1: phone and OTP auth on the mock provider, with the APITxt adapter ready to receive
-   credentials.
-3. Phase 2 needs Q16 and Q18 answered before the seed script.
+1. Get `DATABASE_URL` for Supabase project `hpdanwmpzmviamplunqa`, plus the anon and service role
+   keys. Then run `npm run db:migrate` and `npm run db:seed` and exercise the sign in flow.
+2. Get the APITxt send URL, sender id and template id, then set `SMS_PROVIDER=apitxt`.
+3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

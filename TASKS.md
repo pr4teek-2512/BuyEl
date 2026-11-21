@@ -8,26 +8,26 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 ## Phase 0 - Foundation
 
-- [ ] 0.1 Scaffold Next.js 16 app with TypeScript, App Router, ESLint, Prettier
-- [ ] 0.2 Tailwind CSS v4 setup, white theme tokens, typography scale, spacing scale
-- [ ] 0.3 Base UI kit: Button, Input, Select, ComboBox (type ahead), Modal, BottomSheet, Tabs, Toast, Badge, Avatar (initials), EmptyState, Skeleton
-- [ ] 0.4 Responsive app shell: desktop top nav, mobile bottom nav, header with brand, credit balance and notification bell
-- [ ] 0.5 Prisma init, Supabase project, `.env.example`, connection pooling
-- [ ] 0.6 Vitest and Playwright config, CI workflow for lint, typecheck, unit tests
+- [x] 0.1 Scaffold Next.js 16 app with TypeScript, App Router, ESLint, Prettier
+- [x] 0.2 Tailwind CSS v4 setup, white theme tokens, typography scale, spacing scale
+- [~] 0.3 Base UI kit: Button, TextField, ComboBox (type ahead), Avatar (initials), Card, Badge, EmptyState, Skeleton, PageHeading are done. Modal, BottomSheet, Tabs and Toast land with the screens that need them in phase 3
+- [x] 0.4 Responsive app shell: desktop top nav, mobile bottom nav, header with brand, credit balance and notification bell
+- [x] 0.5 Prisma 7 with the pg driver adapter, full schema, `.env.example`, prisma.config.ts
+- [~] 0.6 Vitest configured and green. Playwright and the CI workflow come with phase 8
 - [ ] 0.7 Error boundary, 404 and 500 pages, logging helper
 
 ## Phase 1 - Authentication
 
-- [ ] 1.1 APITxt integration (needs the API key, sender id, template id and API docs from the owner)
-- [ ] 1.2 SMS adapter interface with `apitxt` and `mock` implementations
-- [ ] 1.3 `otp_codes` table, send OTP endpoint, hashed codes, expiry, attempt counter
-- [ ] 1.4 Rate limiting: per number per hour and per day, per IP, resend cooldown
-- [ ] 1.5 Verify OTP endpoint, JWT access and refresh tokens, httpOnly cookies, session table
-- [ ] 1.6 Registration flow: phone, name with optional last name, college, branch, graduation year
-- [ ] 1.7 Login flow: phone and OTP only, no profile re-entry, redirect to Buy
-- [ ] 1.8 Test account bypass: fixed OTP, no SMS sent, mock profile
-- [ ] 1.9 Route protection middleware, session refresh, logout
-- [ ] 1.10 Unit tests for OTP lifecycle, integration test for register and login
+- [~] 1.1 APITxt wired through a URL template. Needs the send URL, sender id and template id from the owner, then flip `SMS_PROVIDER=apitxt`
+- [x] 1.2 SMS adapter interface with `apitxt` and `mock` implementations
+- [x] 1.3 `otp_codes` table, send OTP, bcrypt hashed codes, 5 minute expiry, attempt counter
+- [x] 1.4 Rate limiting: 60s resend cooldown, 3 per hour, 10 per day, 10 verify attempts per 10 minutes
+- [x] 1.5 Verify OTP, JWT access token and rotating refresh token in httpOnly cookies, session table
+- [x] 1.6 Registration flow: phone, name with optional last name, college, branch, graduation year
+- [x] 1.7 Login flow: phone and OTP only, no profile re-entry, lands on Buy
+- [x] 1.8 Test account bypass: fixed OTP, no SMS sent, redo onboarding honoured
+- [x] 1.9 Route protection in the app layout, sign out, session revocation
+- [~] 1.10 Unit tests green for the text and phone helpers. OTP lifecycle integration tests need the database connection
 
 ## Phase 2 - Master lists (colleges, branches, courses)
 
@@ -140,9 +140,10 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 | Task | Question |
 |---|---|
-| 1.1 | APITxt credentials and API documentation from the owner (development proceeds on the mock provider meanwhile) |
+| all database work | `DATABASE_URL` for the Supabase project `hpdanwmpzmviamplunqa`, plus the anon and service role keys. Nothing has been migrated or seeded yet |
+| 1.1 | APITxt send URL, sender id and template id (development runs on the mock provider meanwhile) |
 | 2.5 | Q16, Q18 seed data for colleges and courses, and what a Course means |
 | 5.3 | Q19 launch price points |
 | 6.4 | Q23 owner edit OTP |
 
-Stack approved on 2026-11-21, so phase 0 is clear to start. Nothing blocks phases 0, 1, 3 or 4.
+Phases 0 and 1 are written and build clean. They cannot be run end to end until the database connection string arrives.
