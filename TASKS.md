@@ -27,7 +27,7 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 - [x] 1.7 Login flow: phone and OTP only, no profile re-entry, lands on Buy
 - [x] 1.8 Test account bypass: fixed OTP, no SMS sent, redo onboarding honoured
 - [x] 1.9 Route protection in the app layout, sign out, session revocation
-- [~] 1.10 Unit tests green for the text and phone helpers. OTP lifecycle integration tests need the database connection
+- [x] 1.10 Unit tests green, and the whole flow verified in the browser against the live Supabase database: register, OTP, profile, sign out, sign in again without re-entering the profile
 
 ## Phase 2 - Master lists (colleges, branches, courses)
 
@@ -140,10 +140,9 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 | Task | Question |
 |---|---|
-| all database work | `DATABASE_URL` for the Supabase project `hpdanwmpzmviamplunqa`, plus the anon and service role keys. Nothing has been migrated or seeded yet |
-| 1.1 | APITxt send URL, sender id and template id (development runs on the mock provider meanwhile) |
+| 1.1 | APITxt send URL and its parameter names (development runs on the mock provider meanwhile) |
 | 2.5 | Q16, Q18 seed data for colleges and courses, and what a Course means |
 | 5.3 | Q19 launch price points |
 | 6.4 | Q23 owner edit OTP |
 
-Phases 0 and 1 are written and build clean. They cannot be run end to end until the database connection string arrives.
+Phases 0 and 1 are done and verified against the live database. Phase 2 is next.

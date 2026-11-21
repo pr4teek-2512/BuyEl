@@ -14,18 +14,7 @@ import {
   issueRegistrationTicket,
   readRegistrationTicket,
 } from "@/server/auth/registrationTicket";
-
-export type AuthStep = "phone" | "otp" | "profile";
-
-export type AuthState = {
-  step: AuthStep;
-  phone: string;
-  /** Present only while SMS_PROVIDER=mock, so development can sign in. */
-  devCode?: string;
-  error?: string;
-};
-
-export const initialAuthState: AuthState = { step: "phone", phone: "" };
+import type { AuthState } from "./state";
 
 const codeSchema = z.string().regex(/^\d{6}$/, "Enter the 6 digit code.");
 

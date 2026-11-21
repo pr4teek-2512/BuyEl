@@ -6,7 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ComboBox } from "@/components/ui/ComboBox";
 import { TextField } from "@/components/ui/Field";
-import { authAction, initialAuthState, type AuthState } from "./actions";
+import { authAction } from "./actions";
+import { initialAuthState, type AuthState } from "./state";
 
 function SubmitButton({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();

@@ -16,9 +16,9 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 and 1 are written. `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean.
-Nothing has touched a database yet: the client's Supabase project is `hpdanwmpzmviamplunqa` and
-the connection string has not been shared, so no migration and no seed has run.
+Phases 0 and 1 are complete and verified end to end in the browser against the live database.
+`next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
+(+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
 Delivered this session:
 - Extracted and read the full PRD, including all six embedded reference screenshots
@@ -87,6 +87,18 @@ Delivered this session:
 | APITxt driven by a URL template in the env file | Their request shape is not publicly documented, so the exact URL can be dropped in with no code change |
 | Colleges and courses seeded empty, branches pre seeded | Owner confirmed on 2026-11-21 |
 
+## Database connection (important)
+
+Supabase project `hpdanwmpzmviamplunqa` is in **ap-southeast-1**, and its direct host
+`db.<ref>.supabase.co` resolves to IPv6 only, which this machine cannot route. The working
+connection is the session pooler:
+
+    postgresql://postgres.hpdanwmpzmviamplunqa:<password>@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+
+The password contains `@`, so it must stay percent encoded as `%40` inside the URL.
+Migration `20261121162318_init` is applied. The seed has run: 134 branches, the owner admin with
+all 8 page permissions, and 4 payment platforms. Colleges and courses are empty by design.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -100,8 +112,9 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Get `DATABASE_URL` for Supabase project `hpdanwmpzmviamplunqa`, plus the anon and service role
-   keys. Then run `npm run db:migrate` and `npm run db:seed` and exercise the sign in flow.
-2. Get the APITxt send URL, sender id and template id, then set `SMS_PROVIDER=apitxt`.
+1. Get the APITxt send URL and parameter names, then set `SMS_PROVIDER=apitxt`. The owner's view
+   is that no DLT template of our own is needed because APITxt is a reseller on its own
+   registration, which is plausible; only their endpoint shape is still required.
+2. Phase 2: the admin review queue UI for the three master lists.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.
