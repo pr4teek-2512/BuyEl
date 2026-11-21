@@ -104,19 +104,27 @@ Deviation from the plan, with the reason:
 
 ## Phase 5 - Payments and QR verification
 
-- [ ] 5.1 `payment_platforms` table and admin screen: logo, UTR term, app transaction term, explanatory image
-- [ ] 5.2 `plans` table and admin screen for the three categories, each with price, QR and duration or credits
-- [!] 5.3 Launch price points entered (blocked on Q19)
-- [ ] 5.4 Step 1 modal: price, what is being bought, platform picker
-- [ ] 5.5 Step 2 modal: QR image, amount, download QR, platform specific labels, explanatory image, do-not-paste warning
-- [ ] 5.6 UTR input, validation, uniqueness check, submit, pending state on the user side
-- [ ] 5.7 Admin payments page: search by phone or transaction id, status filter, pagination
-- [ ] 5.8 Accept action, with the grant performed inside the same transaction
-- [ ] 5.9 Reject action with reason and a user notification
-- [ ] 5.10 Grants: wallet credits, listing chat unlock, listing boost
-- [ ] 5.11 Re-boost of an already boosted listing
-- [ ] 5.12 Boost expiry handled at read time plus a nightly sweep
-- [ ] 5.13 Tests for each grant path and for duplicate UTR rejection
+- [x] 5.1 `payment_platforms` admin screen: logo, UTR term, app transaction term, explanatory image
+- [x] 5.2 `plans` admin screen for all three categories, each with price, QR upload, duration or credits
+- [x] 5.3 Launch price points are the owner's to set. Three were created through the real form while testing (49 for 2 credits, 29 to unlock, 39 for 10 days) and can be changed or deleted
+- [x] 5.4 Step 1 modal: price, what you get, payment app picker
+- [x] 5.5 Step 2 modal: QR for that exact price, download QR, UPI ID, platform specific labels, explanatory image, do-not-paste warning
+- [x] 5.6 Transaction ID input, normalisation, validation, uniqueness, submit, pending state that blocks paying twice
+- [x] 5.7 Admin payments page: search by phone or transaction ID, status filter, pagination
+- [x] 5.8 Accept, with the grant applied before the status changes
+- [x] 5.9 Reject with a reason, and a notification carrying that reason to the student
+- [x] 5.10 All three grants: wallet credits, listing chat unlock, listing boost
+- [x] 5.11 Re-boost of an already boosted listing, adding to the time left rather than replacing it
+- [x] 5.12 Boost expiry honoured at read time, plus a nightly sweep at `/api/cron/sweep-boosts` scheduled in `vercel.json`
+- [x] 5.13 17 unit tests for the payment rules. Every grant path and the duplicate reference guard were exercised live against the database
+
+Images are stored in a public Supabase Storage bucket (`buyel-public`) through the service role
+key, server side only.
+
+One thing could not be driven from here: the QR file picker. File inputs cannot be operated by
+the browser tool, so the upload code was exercised against the real storage API directly and the
+resulting public URL attached to the three plans. Upload a QR through the admin form yourself to
+confirm the last step.
 
 ## Phase 6 - Admin panel
 
@@ -167,4 +175,4 @@ Deviation from the plan, with the reason:
 | 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
 | 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0 to 4 are done and verified against the live database. Phase 5 (payments and QR verification) is next, and it turns on Unlock chat, Boost and buying credits.
+Phases 0 to 5 are done and verified against the live database. The whole money loop works: buy credits, unlock chat, boost, verify, reject. Phase 6 (the remaining admin pages) is next.

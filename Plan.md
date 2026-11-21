@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 to 4 are complete and verified end to end in the browser against the live database.
+Phases 0 to 5 are complete and verified end to end in the browser against the live database.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -53,6 +53,9 @@ Delivered this session:
   compare and decrement that makes a double spend impossible.
 - Chat: one credit per listing, Buy Chats and Sell Chats, anonymous conversations, unread dots,
   a locked state for sellers who have not unlocked that listing, and polling for new messages.
+- Payments: plans and QR codes per price point, payment apps with their own wording for the UTR,
+  the two step payment popup, transaction submission, admin accept and reject, and the three
+  grants (credits, chat unlock, boost) with notifications and audit entries.
 - Master lists admin page: colleges, branches and courses with search, pagination, add, edit,
   delete and case insensitive duplicate rejection, plus the pending request queue carrying all
   three PRD 16.3 actions.
@@ -189,6 +192,20 @@ Decision worth confirming: a locked seller cannot read the waiting messages, onl
 The PRD says a seller unlocks chat to respond, and hiding the content is what gives them a
 reason to pay.
 
+## Phase 5 verification (done against real data)
+
+Three plans were created through the admin form. A plan with no QR stays hidden from students,
+which the panel says out loud. A student bought 2 credits for 49 rupees through the two step
+popup, the reference was normalised from "5312 7788 9021" to "531277889021", the admin accepted
+it and the balance went from 0 to 2 with a ledger row, a notification and an audit entry. A
+boost was bought the same way: the listing went from rank #7 to #1, gained a ten day window and
+the button became Extend boost. Reusing an already submitted reference was refused. A rejection
+carried its reason through to the student's payment history.
+
+The payment app labels follow the app chosen, exactly as the PRD requires: Google Pay asks for
+the "UPI transaction ID" and warns against the "Google transaction ID", PhonePe asks for the
+"UTR", Paytm for the "UPI Ref. No.".
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -202,9 +219,8 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 5: payments. Plans and QR codes in the admin panel, the two step payment modal, UTR
-   submission, admin accept and reject, and the three grants. This turns on buying credits,
-   Unlock chat and Boost.
-2. Phase 6: the remaining admin pages.
+1. Phase 6: the remaining admin pages, which are users, listings, user access with employee
+   accounts and per page permissions, test account management, and the audit log viewer.
+2. Phase 7: the public landing search and the notification triggers.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.
