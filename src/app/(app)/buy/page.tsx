@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/server/auth/session";
 import { fetchListingPage } from "@/server/services/ordering.service";
+import { buildFeedFilters } from "@/server/services/ordering.rules";
 import { existingThreadListingIds } from "@/server/services/chat.service";
 import { EmptyState, PageHeading } from "@/components/ui/Primitives";
 import { ListingCard } from "@/components/listing/ListingCard";
@@ -30,13 +31,14 @@ export default async function BuyPage({
   const college = params.college ?? user.collegeText;
   const course = params.course ?? "";
 
+  // Same builder the public landing search uses, so the two cannot drift.
   const { cards, total, hasMore } = await fetchListingPage(
-    {
+    buildFeedFilters({
       status: tab === "available" ? "active" : "closed",
-      collegeText: college,
-      courseText: course || null,
-      excludeSellerId: user.id,
-    },
+      college,
+      course,
+      viewerId: user.id,
+    }),
     page,
   );
 

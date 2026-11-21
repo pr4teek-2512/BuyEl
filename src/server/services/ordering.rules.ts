@@ -133,3 +133,32 @@ export function planPage(
 export function rankFromAboveCount(aboveCount: number): number {
   return aboveCount + 1;
 }
+
+/**
+ * PRD section 14: the public landing search and the logged in Buy page must
+ * return the same listings in the same order. Both build their filters here,
+ * so the only possible difference is that a signed in student does not see
+ * their own listings, which is what `viewerId` expresses.
+ */
+export type FeedQuery = {
+  college?: string | null;
+  course?: string | null;
+  status?: "active" | "closed";
+  viewerId?: string | null;
+};
+
+export type FeedFilters = {
+  status: "active" | "closed";
+  collegeText: string | null;
+  courseText: string | null;
+  excludeSellerId: string | undefined;
+};
+
+export function buildFeedFilters(query: FeedQuery): FeedFilters {
+  return {
+    status: query.status ?? "active",
+    collegeText: query.college?.trim() ? query.college.trim() : null,
+    courseText: query.course?.trim() ? query.course.trim() : null,
+    excludeSellerId: query.viewerId ?? undefined,
+  };
+}

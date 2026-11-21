@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BOOSTED_CHAT_THRESHOLD,
+  buildFeedFilters,
   NORMAL_CHAT_THRESHOLD,
   compareListings,
   decidePushToBottom,
@@ -269,5 +270,32 @@ describe("seller rank", () => {
   it("is one based", () => {
     expect(rankFromAboveCount(0)).toBe(1);
     expect(rankFromAboveCount(7)).toBe(8);
+  });
+});
+
+describe("the public search and the Buy page share one feed", () => {
+  it("builds identical filters apart from hiding your own listings", async () => {
+    const { buildFeedFilters } = await import("@/server/services/ordering.rules");
+
+    const visitor = buildFeedFilters({ college: "DTU", course: "DBMS" });
+    const student = buildFeedFilters({ college: "DTU", course: "DBMS", viewerId: "user-1" });
+
+    expect({ ...visitor, excludeSellerId: undefined }).toEqual({
+      ...student,
+      excludeSellerId: undefined,
+    });
+    expect(visitor.excludeSellerId).toBeUndefined();
+    expect(student.excludeSellerId).toBe("user-1");
+  });
+
+  it("treats blank filters as no filter at all", () => {
+    const filters = buildFeedFilters({ college: "   ", course: "" });
+    expect(filters.collegeText).toBeNull();
+    expect(filters.courseText).toBeNull();
+    expect(filters.status).toBe("active");
+  });
+
+  it("carries the sold out tab through unchanged", () => {
+    expect(buildFeedFilters({ status: "closed" }).status).toBe("closed");
   });
 });
