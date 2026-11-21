@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0, 1 and 2 are complete and verified end to end in the browser against the live database.
+Phases 0 to 3 are complete and verified end to end in the browser against the live database.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -41,6 +41,14 @@ Delivered this session:
 - Public landing page.
 - Admin panel (`/admin`): own login and session cookie, per page permissions, sidebar that hides
   what an account cannot see, dashboard with counts, and a full audit log on every write.
+- Listings: create (free), edit price, close, reopen, delete, with the course and college names
+  write once after confirmation.
+- The ordering engine: two pure modules, `ordering.rules.ts` for the ten PRD rules and
+  `ordering.service.ts` for the queries, with 20 unit tests.
+- Buy page: Available and Sold Out tabs, search by university and course with the student's own
+  university preselected, anonymous listing cards, pagination across both buckets.
+- Sell page: create form, and a card per listing showing every field, the live rank within its
+  own college, and Edit price, Unlock chat, Boost, Close, Reopen and Delete in correct states.
 - Master lists admin page: colleges, branches and courses with search, pagination, add, edit,
   delete and case insensitive duplicate rejection, plus the pending request queue carrying all
   three PRD 16.3 actions.
@@ -142,6 +150,25 @@ all 8 page permissions, and 4 payment platforms. Colleges and courses are empty 
   redirected off the dashboard, and got a read only master list with no Add, Save or Delete.
   That account was deleted afterwards.
 
+## Phase 3 verification (done against real data)
+
+Six listings were seeded with controlled keys and the Buy page returned exactly the predicted
+order: newest boost, older boost, then the normal bucket oldest first, with a listing whose
+boost had expired falling back into the normal bucket in its correct position by age. A listing
+created through the form landed at the very bottom and showed rank #6; granting it a boost moved
+it to rank #1 and to the top of the feed. Closing a listing moved it to Sold Out, and the Close
+button only appeared once chat was unlocked for that listing.
+
+Two deliberate decisions worth confirming:
+
+- A student does not see their own listings on the Buy page, since chatting with yourself makes
+  no sense. They see them all on Sell.
+- Delete is a soft delete. The listing leaves both tabs, and the row is kept so existing
+  conversations and payment history stay readable.
+
+Test data in the database: listings with ids `ord1` to `ord6` were seeded by hand to prove the
+ordering. Remove them with `delete from listings where id like 'ord%';` whenever you like.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -155,8 +182,8 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 3: listings, the Buy page, the Sell page and the ordering engine, which is the biggest
-   single piece of the PRD and the one with the most exact rules.
-2. Phase 4: chat and the credit ledger.
+1. Phase 4: the credit ledger and chat, which wires up the Chat button and makes
+   `applyChatThreshold` fire for real.
+2. Phase 5: payments, which turns on Unlock chat and Boost.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

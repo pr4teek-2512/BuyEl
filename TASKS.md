@@ -54,21 +54,29 @@ Also delivered here, ahead of phase 6, because the queue needs it:
 
 ## Phase 3 - Listings, Buy page and the ordering engine
 
-- [ ] 3.1 `listings` table with both ordering keys and both push-to-bottom flags
-- [ ] 3.2 Create listing form: course, college, price, with type ahead and free text fallback
-- [ ] 3.3 Immutability guard on course name and college name after confirmation
-- [ ] 3.4 Edit price action
-- [ ] 3.5 Close listing action, gated on chat being unlocked for that listing
-- [ ] 3.6 Delete listing action, removed from Available and Sold Out
-- [ ] 3.7 `ordering.service.ts` implementing rules 1 to 10 from the plan
-- [ ] 3.8 Unit tests covering every ordering rule and their interactions
-- [ ] 3.9 Buy page: Available tab, listing card with initials avatar, course, college abbreviation, price, Chat button
-- [ ] 3.10 Buy page: Sold Out tab
-- [ ] 3.11 Search sheet: university defaults to the user's own, course optional, change university allowed
-- [ ] 3.12 Sell page: listing cards with every field, all five actions in the correct states
-- [ ] 3.13 Seller rank display, scoped to the listing's own college, updating with boost
-- [ ] 3.14 Pagination or infinite scroll with the ordering preserved
-- [ ] 3.15 Indexes for the feed query, verified with EXPLAIN ANALYZE
+- [x] 3.1 `listings` table with both ordering keys and both push-to-bottom flags
+- [x] 3.2 Create listing form: course, college, price, with type ahead and free text fallback
+- [x] 3.3 Immutability guard on course name and college name after confirmation
+- [x] 3.4 Edit price action
+- [x] 3.5 Close listing action, gated on chat being unlocked for that listing
+- [x] 3.6 Delete listing action, with a confirmation step, removed from Available and Sold Out
+- [x] 3.7 `ordering.rules.ts` and `ordering.service.ts` implementing rules 1 to 10
+- [x] 3.8 20 unit tests covering every ordering rule, their interactions, and the exact Abhishek scenario from the PRD
+- [x] 3.9 Buy page: Available tab, listing card with initials avatar, course, college short form, price, Chat button
+- [x] 3.10 Buy page: Sold Out tab
+- [x] 3.11 Search: university defaults to the student's own, course optional, both changeable
+- [x] 3.12 Sell page: listing cards with every field and all actions in their correct states
+- [x] 3.13 Seller rank, scoped to the listing's own college, updating when the listing is boosted
+- [x] 3.14 Pagination with the ordering preserved across the two buckets
+- [~] 3.15 Indexes for the feed query exist in the schema. Measuring them with EXPLAIN ANALYZE needs a realistic data volume, which comes with the phase 8 seed script
+
+Carried into phase 4 and 5 by design:
+
+- The Chat button renders on every Available card but does nothing yet, because spending a
+  credit to open a chat is phase 4.
+- Unlock Chat and Boost are shown in their correct states but are disabled, because both are
+  paid actions and payments are phase 5. `applyChatThreshold` and the boost grant are written
+  and unit tested, and were exercised by setting the same database fields those steps will set.
 
 ## Phase 4 - Chat and in-app currency
 
@@ -150,4 +158,4 @@ Also delivered here, ahead of phase 6, because the queue needs it:
 | 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
 | 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0, 1 and 2 are done and verified against the live database. Phase 3 (listings, the Buy page and the ordering engine) is next and nothing blocks it.
+Phases 0 to 3 are done and verified against the live database. Phase 4 (chat and the credit ledger) is next, then phase 5 unlocks the paid actions.
