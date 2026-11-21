@@ -35,6 +35,11 @@ export type PaymentPlatformOption = {
  *   Step 2: the QR for that exact price, then the transaction reference,
  *           labelled with the words that app itself uses.
  */
+/** Some apps name their field with a trailing dot, so sentences do not double up. */
+function term(value: string): string {
+  return value.trim().replace(/\.+$/, "");
+}
+
 export function PaymentDialog({
   title,
   plans,
@@ -293,7 +298,7 @@ function StepTwo({
           {platform.appTxnTerm ? (
             <p className="mb-2 flex items-start gap-1.5 rounded-lg bg-danger-soft px-2.5 py-2 text-xs text-danger">
               <Info className="mt-0.5 size-3.5 shrink-0" />
-              Do not paste the {platform.appTxnTerm}. We need the {platform.utrTerm}.
+              Do not paste the {term(platform.appTxnTerm)}. We need the {term(platform.utrTerm)}.
             </p>
           ) : null}
 
