@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 and 1 are complete and verified end to end in the browser against the live database.
+Phases 0, 1 and 2 are complete and verified end to end in the browser against the live database.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -39,6 +39,11 @@ Delivered this session:
 - Master list service implementing all of PRD section 16, including the three admin actions.
 - Seed script: Indian UG and PG branch list, owner admin account, the four payment platforms.
 - Public landing page.
+- Admin panel (`/admin`): own login and session cookie, per page permissions, sidebar that hides
+  what an account cannot see, dashboard with counts, and a full audit log on every write.
+- Master lists admin page: colleges, branches and courses with search, pagination, add, edit,
+  delete and case insensitive duplicate rejection, plus the pending request queue carrying all
+  three PRD 16.3 actions.
 
 ## Approach and strategy
 
@@ -122,6 +127,21 @@ The password contains `@`, so it must stay percent encoded as `%40` inside the U
 Migration `20261121162318_init` is applied. The seed has run: 134 branches, the owner admin with
 all 8 page permissions, and 4 payment platforms. Colleges and courses are empty by design.
 
+## Phase 2 verification (done against real data)
+
+- Add to master list: "Delhi Technological University" with short form DTU became an official
+  college, and the student who typed it was linked to it automatically.
+- Fix this student's entry only: a student who had typed "DTU" was corrected to the full name,
+  got a notification, and the master list stayed at one college. A correction that matches an
+  existing official entry now links to it as well, which is a small improvement on the PRD text.
+- Ignore: the request left the queue and nothing else changed.
+- Each action wrote an audit row.
+- Typing "dtu" in the student type-ahead now returns Delhi Technological University, so the
+  abbreviation requirement in PRD 16.1 works end to end.
+- A view only employee was created, signed in, saw only the page they were granted, was
+  redirected off the dashboard, and got a read only master list with no Add, Save or Delete.
+  That account was deleted afterwards.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -135,7 +155,8 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 2: the admin review queue UI for the three master lists.
-2. Phase 3: listings, the Buy page and the ordering engine.
+1. Phase 3: listings, the Buy page, the Sell page and the ordering engine, which is the biggest
+   single piece of the PRD and the one with the most exact rules.
+2. Phase 4: chat and the credit ledger.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

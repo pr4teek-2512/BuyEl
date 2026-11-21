@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/server/db";
 import { deriveAbbreviation, normalizeName } from "@/lib/text";
+import { writeAudit } from "./admin.service";
 import type { MasterListType } from "@/generated/prisma/enums";
 
 export type Suggestion = {
@@ -213,13 +214,30 @@ export async function addRequestToMasterList(
       resolvedAt: new Date(),
     },
   });
+
+  await writeAudit({
+    adminUserId: adminId,
+    action: "master_request_added",
+    entity: request.listType,
+    entityId: requestId,
+    before: { submittedText: request.submittedText },
+    after: { resolvedText: finalText },
+  });
 }
 
 /** Admin action 2 in PRD 16.3. Drops the request, leaves the user value alone. */
 export async function ignoreRequest(requestId: string, adminId: string) {
-  await prisma.masterListRequest.update({
+  const request = await prisma.masterListRequest.update({
     where: { id: requestId },
     data: { status: "ignored", resolvedByAdminId: adminId, resolvedAt: new Date() },
+  });
+
+  await writeAudit({
+    adminUserId: adminId,
+    action: "master_request_ignored",
+    entity: request.listType,
+    entityId: requestId,
+    before: { submittedText: request.submittedText },
   });
 }
 
@@ -236,25 +254,41 @@ export async function modifyUserEntryOnly(
   if (!request) throw new Error("Request not found");
 
   const finalText = correctedText.trim();
+  const normalized = normalizeName(finalText);
+
+  // If the correction happens to match an entry that is already official, link
+  // to it as well. The master list itself is still left untouched.
+  const existingCollege =
+    request.listType === "college"
+      ? await prisma.college.findUnique({ where: { normalizedName: normalized } })
+      : null;
+  const existingBranch =
+    request.listType === "branch"
+      ? await prisma.branch.findUnique({ where: { normalizedName: normalized } })
+      : null;
+  const existingCourse =
+    request.listType === "course"
+      ? await prisma.course.findFirst({ where: { normalizedName: normalized } })
+      : null;
 
   if (request.listType === "college") {
     await prisma.user.updateMany({
       where: { collegeId: null, collegeText: { equals: request.submittedText, mode: "insensitive" } },
-      data: { collegeText: finalText },
+      data: { collegeText: existingCollege?.name ?? finalText, collegeId: existingCollege?.id ?? null },
     });
     await prisma.listing.updateMany({
       where: { collegeId: null, collegeText: { equals: request.submittedText, mode: "insensitive" } },
-      data: { collegeText: finalText },
+      data: { collegeText: existingCollege?.name ?? finalText, collegeId: existingCollege?.id ?? null },
     });
   } else if (request.listType === "branch") {
     await prisma.user.updateMany({
       where: { branchId: null, branchText: { equals: request.submittedText, mode: "insensitive" } },
-      data: { branchText: finalText },
+      data: { branchText: existingBranch?.name ?? finalText, branchId: existingBranch?.id ?? null },
     });
   } else {
     await prisma.listing.updateMany({
       where: { courseId: null, courseText: { equals: request.submittedText, mode: "insensitive" } },
-      data: { courseText: finalText },
+      data: { courseText: existingCourse?.name ?? finalText, courseId: existingCourse?.id ?? null },
     });
   }
 
@@ -278,5 +312,14 @@ export async function modifyUserEntryOnly(
       resolvedByAdminId: adminId,
       resolvedAt: new Date(),
     },
+  });
+
+  await writeAudit({
+    adminUserId: adminId,
+    action: "master_request_user_entry_modified",
+    entity: request.listType,
+    entityId: requestId,
+    before: { submittedText: request.submittedText },
+    after: { resolvedText: finalText },
   });
 }

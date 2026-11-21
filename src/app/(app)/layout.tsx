@@ -4,7 +4,7 @@ import { prisma } from "@/server/db";
 import { initials } from "@/lib/text";
 import { AppHeader, MobileNav } from "@/components/shell/AppShell";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: LayoutProps<"/">) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 

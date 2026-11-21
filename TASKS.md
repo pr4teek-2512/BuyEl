@@ -31,19 +31,26 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 ## Phase 2 - Master lists (colleges, branches, courses)
 
-- [ ] 2.1 Tables for `colleges`, `branches`, `courses`, `master_list_requests`
-- [ ] 2.2 Normalisation helper (lowercase, trim, collapse whitespace) and exact match detection
-- [ ] 2.3 College abbreviation field, abbreviation aware suggestion search
-- [ ] 2.4 Seed the Indian UG and PG branch list
-- [!] 2.5 Seed decision for colleges and courses (blocked on Q16, Q18)
-- [ ] 2.6 ComboBox API: debounce, prefix and substring matching, keyboard navigation
-- [ ] 2.7 Free text submission: usable immediately for that user, request queued for admin
-- [ ] 2.8 Admin requests queue UI with the three actions
-- [ ] 2.9 Action: add to master list, with optional correction, and relink of matching users (Q17)
-- [ ] 2.10 Action: ignore request, leaving the user entry untouched
-- [ ] 2.11 Action: modify the user entry only, without touching the master list
-- [ ] 2.12 Admin CRUD for all three lists
-- [ ] 2.13 Unit tests for normalisation, matching, and each admin action
+- [x] 2.1 Tables for `colleges`, `branches`, `courses`, `master_list_requests`
+- [x] 2.2 Normalisation helper (lowercase, trim, collapse whitespace) and exact match detection
+- [x] 2.3 College abbreviation field, abbreviation aware suggestion search (typing "dtu" finds Delhi Technological University)
+- [x] 2.4 Seed the Indian UG and PG branch list (134 entries)
+- [x] 2.5 Colleges and courses start empty, confirmed by the owner
+- [x] 2.6 ComboBox API: debounce, prefix and substring matching, keyboard navigation
+- [x] 2.7 Free text submission: usable immediately for that user, request queued for admin
+- [x] 2.8 Admin requests queue UI with the three actions
+- [x] 2.9 Action: add to master list, with optional correction, and relink of every matching user and listing
+- [x] 2.10 Action: ignore request, leaving the user entry untouched
+- [x] 2.11 Action: modify the user entry only, without touching the master list, with a notification to that student
+- [x] 2.12 Admin CRUD for all three lists, with search, pagination and case insensitive duplicate rejection
+- [~] 2.13 Normalisation, matching and abbreviation logic are unit tested. The admin actions were verified end to end in the browser against the live database; automated integration tests for them need a throwaway test database, which is set up in phase 8
+
+Also delivered here, ahead of phase 6, because the queue needs it:
+
+- [x] Admin authentication with its own session cookie and the seeded owner account
+- [x] Per page permission model, with the sidebar, the pages and every action guarded
+- [x] Audit log written on every admin write
+- [x] Admin dashboard with counts, excluding test accounts
 
 ## Phase 3 - Listings, Buy page and the ordering engine
 
@@ -96,15 +103,15 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 ## Phase 6 - Admin panel
 
-- [ ] 6.1 Admin auth, separate cookie, seeded owner account
-- [ ] 6.2 Per page permission model and route guards
+- [x] 6.1 Admin auth, separate cookie, seeded owner account (done in phase 2)
+- [x] 6.2 Per page permission model and route guards (done in phase 2, verified with a view only employee)
 - [ ] 6.3 User Access page: create and edit employee admins, assign pages
 - [!] 6.4 Owner edit OTP verification (blocked on Q23)
 - [ ] 6.5 Test Accounts section: create, fixed OTP, paid services toggle, test mode, redo onboarding
 - [ ] 6.6 Users page: search, profile, credit balance, manual adjustment, block
 - [ ] 6.7 Listings page: moderate, force close, delete
 - [ ] 6.8 Dashboard counts, with test accounts excluded from statistics
-- [ ] 6.9 Audit log of every admin action, viewable in the panel
+- [~] 6.9 Audit log is written on every admin action. The page to read it in the panel is still to build
 
 ## Phase 7 - Public landing page and notifications
 
@@ -140,8 +147,7 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 | Task | Question |
 |---|---|
-| 2.5 | Q18 is answered (Course is a subject). Nothing blocks this now |
-| 5.3 | Q19 launch price points |
-| 6.4 | Q23 owner edit OTP |
+| 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
+| 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0 and 1 are done, verified against the live database, and OTP now goes through APITxT. Phase 2 is next.
+Phases 0, 1 and 2 are done and verified against the live database. Phase 3 (listings, the Buy page and the ordering engine) is next and nothing blocks it.
