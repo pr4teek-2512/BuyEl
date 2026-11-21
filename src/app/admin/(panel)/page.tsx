@@ -14,13 +14,14 @@ export default async function AdminDashboardPage() {
     redirect(canView(admin, "master_lists") ? "/admin/master-lists" : "/admin/login");
   }
 
-  const [users, colleges, branches, courses, pending, listings] = await Promise.all([
+  const [users, colleges, branches, courses, pending, listings, pendingPayments] = await Promise.all([
     prisma.user.count({ where: { isTestAccount: false } }),
     prisma.college.count(),
     prisma.branch.count(),
     prisma.course.count(),
     prisma.masterListRequest.count({ where: { status: "pending" } }),
     prisma.listing.count({ where: { status: "active" } }),
+    prisma.paymentRequest.count({ where: { status: "pending" } }),
   ]);
 
   const tiles = [
@@ -30,6 +31,7 @@ export default async function AdminDashboardPage() {
     { label: "Branches", value: branches },
     { label: "Courses", value: courses },
     { label: "Pending requests", value: pending, highlight: pending > 0 },
+    { label: "Payments to verify", value: pendingPayments, highlight: pendingPayments > 0 },
   ];
 
   return (

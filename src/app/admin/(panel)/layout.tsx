@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ADMIN_PAGES, canView, getCurrentAdmin } from "@/server/auth/adminSession";
 import { countPendingRequests } from "@/server/services/masterlistAdmin.service";
+import { countPendingPayments } from "@/server/services/payment.service";
 import { AdminMobileNav, AdminSidebar, type AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminSignOut } from "./AdminSignOut";
 
@@ -9,20 +10,29 @@ const BUILT: Record<string, string> = {
   dashboard: "/admin",
   master_lists: "/admin/master-lists",
   plans: "/admin/plans",
+  payments: "/admin/payments",
 };
 
 export default async function AdminPanelLayout({ children }: LayoutProps<"/admin">) {
   const admin = await getCurrentAdmin();
   if (!admin) redirect("/admin/login");
 
-  const pending = canView(admin, "master_lists") ? await countPendingRequests() : 0;
+  const [pending, pendingPayments] = await Promise.all([
+    canView(admin, "master_lists") ? countPendingRequests() : Promise.resolve(0),
+    canView(admin, "payments") ? countPendingPayments() : Promise.resolve(0),
+  ]);
 
   const items: AdminNavItem[] = ADMIN_PAGES.filter((page) => canView(admin, page.key)).map(
     (page) => ({
       href: BUILT[page.key] ?? `/admin/${page.key.replace(/_/g, "-")}`,
       label: page.label,
       pageKey: page.key,
-      badge: page.key === "master_lists" && pending > 0 ? pending : undefined,
+      badge:
+        page.key === "master_lists" && pending > 0
+          ? pending
+          : page.key === "payments" && pendingPayments > 0
+            ? pendingPayments
+            : undefined,
       available: Boolean(BUILT[page.key]),
     }),
   );
