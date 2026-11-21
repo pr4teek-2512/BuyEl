@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 to 7 are complete and verified end to end in the browser against the live database. Every feature in the PRD is built.
+Phases 0 to 8 are complete. Every feature in the PRD is built, hardened, and covered by 82 unit tests and 39 end to end tests across desktop and phone.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -231,6 +231,18 @@ The bell showed three unread notifications from the real payment activity, the d
 the panel was opened, and a mobile width check caught the panel overflowing the screen, now
 fixed with a max width.
 
+## Phase 8 notes
+
+Running `next build` while the dev server is running clobbers its `.next` output and the dev
+server then fails with confusing Prisma errors. Restart the dev server after a build.
+
+The end to end suite signs in with the seeded test accounts, so it sends no SMS and spends no
+credits, but it does write to whatever `DATABASE_URL` points at. It creates listings and deletes
+them again. Point it at a scratch database before running it near production data.
+
+Admin sign in is throttled to 10 attempts per 15 minutes. The suite signs in once in a setup
+project and reuses the session, because signing in per test locked itself out.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -244,10 +256,10 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 8: hardening. Security headers and CSP, an accessibility pass, loading and error
-   states, a Playwright end to end suite, a realistic seed script and the index measurement that
-   was deferred from phase 3.
-2. Phase 9: launch. Production Supabase settings, the real APITxT send, domain and deploy, and a
-   handover guide for the owner.
+1. Phase 9: launch. Production environment variables on Vercel, the domain, `prisma migrate
+   deploy` against production, a first real APITxT send, and a handover guide so the owner can
+   run the panel without a developer.
+2. Still waiting on the owner: upload one QR through the admin form to confirm that last hop,
+   and decide whether a rejected transaction reference stays reusable by the same student.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

@@ -165,13 +165,30 @@ see their own listings on the Buy page, which the shared helper expresses as `vi
 
 ## Phase 8 - Polish, performance and hardening
 
-- [ ] 8.1 Mobile app feel pass: bottom nav, sheets, tap targets, safe areas, no horizontal scroll
-- [ ] 8.2 Loading skeletons and empty states on every list
-- [ ] 8.3 Accessibility pass: labels, focus order, contrast, screen reader checks
-- [ ] 8.4 Security headers, CSP, CSRF, dependency audit
-- [ ] 8.5 Playwright end to end suite for the full buyer and seller journey
-- [ ] 8.6 Seed and demo data script
-- [ ] 8.7 Lighthouse and query performance targets met
+- [x] 8.1 Mobile pass: bottom nav, safe areas, tap targets, and an end to end test asserting no sideways scrolling at 375px
+- [x] 8.2 Loading skeletons on every list page, plus an error boundary and a 404 page (finishes task 0.7)
+- [x] 8.3 Accessibility: every input has a real label, the notification bell announces its unread count, dialogs close on Escape, and focus rings are visible throughout
+- [x] 8.4 Security headers and a nonce based CSP in `src/proxy.ts`, and a dependency audit that now reports zero vulnerabilities
+- [x] 8.5 Playwright suite: 39 tests across desktop and a Pixel 7 profile, covering sign in, listings, the public page and the admin panel
+- [x] 8.6 `npm run db:demo` creates about 5,000 listings across 40 colleges, and `-- --clean` removes exactly what it created
+- [x] 8.7 Feed query measured with EXPLAIN ANALYZE at 5,000 listings (finishes task 3.15)
+
+What the measurement found and fixed:
+
+- The feed filters by college **text**, which no index can serve. At 5,000 listings it scanned
+  4,687 rows to return 20, taking 8.3ms and growing linearly. A typed college name is now
+  resolved to its official id first, which turns the same query into an index scan at 1.5ms.
+  A college not yet in the master list still falls back to text.
+- Migration `20261122000000_search_indexes` adds a trigram index for course searches, an index
+  on `lower(college_text)` for that fallback, and a composite index for the boosted bucket.
+
+Also fixed while hardening:
+
+- `middleware.ts` is deprecated in Next 16, so it is now `proxy.ts`.
+- An expired session threw a 500 on page loads. Pages now use `requireUserForPage`, which
+  redirects to sign in; server actions keep the throwing version so forms can show a message.
+- The audit found a ReDoS advisory in `effect`, pulled in by the Prisma CLI. Pinned above the
+  patched version with an npm override rather than downgrading Prisma.
 
 ## Phase 9 - Launch
 
@@ -190,4 +207,4 @@ see their own listings on the Buy page, which the shared helper expresses as `vi
 | 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
 | 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0 to 7 are done and verified against the live database. Every feature in the PRD is now built. Phase 8 (hardening, accessibility, end to end tests, seed data) and phase 9 (launch) remain.
+Phases 0 to 8 are done. Every feature in the PRD is built, hardened and covered by tests. Only phase 9, launch, remains.
