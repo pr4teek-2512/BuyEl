@@ -152,13 +152,16 @@ Notes:
 
 ## Phase 7 - Public landing page and notifications
 
-- [ ] 7.1 Landing page layout, hero, value proposition, sign in call to action
-- [ ] 7.2 Public search by college and course, reusing the ordering engine unchanged
-- [ ] 7.3 Chat button on public results prompts registration
-- [ ] 7.4 `notifications` table and service
-- [ ] 7.5 Header bell with the latest 6 notifications, unread dot, mark as read
-- [ ] 7.6 Notification triggers: payment rejected, payment accepted, boost expired, admin corrected an entry
-- [ ] 7.7 Test proving public and logged in results are identical for the same filters
+- [x] 7.1 Landing page layout, hero, value proposition, sign in call to action
+- [x] 7.2 Public search by college and course, with the same type ahead the app uses
+- [x] 7.3 Results show a Sign in to chat button for visitors, Open app for someone already signed in
+- [x] 7.4 `notifications` table and service, with the bell limited to the latest 6
+- [x] 7.5 Header bell with an unread dot that clears when the panel is opened
+- [x] 7.6 Notification triggers in place: payment accepted, payment rejected with its reason, boost expired, a student entry corrected by an admin, and a listing closed or removed by moderation
+- [x] 7.7 Both surfaces call one `buildFeedFilters` helper and one `fetchListingPage`, covered by a unit test and checked side by side in the browser: the same six listings in the same order
+
+The only intentional difference between the two surfaces is that a signed in student does not
+see their own listings on the Buy page, which the shared helper expresses as `viewerId`.
 
 ## Phase 8 - Polish, performance and hardening
 
@@ -187,4 +190,4 @@ Notes:
 | 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
 | 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0 to 6 are done and verified against the live database. The admin panel is complete. Phase 7 (the public landing search and notification triggers) is next.
+Phases 0 to 7 are done and verified against the live database. Every feature in the PRD is now built. Phase 8 (hardening, accessibility, end to end tests, seed data) and phase 9 (launch) remain.

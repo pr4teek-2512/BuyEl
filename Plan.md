@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 to 6 are complete and verified end to end in the browser against the live database.
+Phases 0 to 7 are complete and verified end to end in the browser against the live database. Every feature in the PRD is built.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -59,6 +59,8 @@ Delivered this session:
 - Admin panel is complete: user access with employee accounts and per page permissions, an OTP
   gate on owner account changes, test account management, students with credit adjustment and
   blocking, listing moderation, and an activity log.
+- Public landing search that returns the same listings in the same order as the Buy page, and
+  notifications with a bell that clears its unread dot when opened.
 - Master lists admin page: colleges, branches and courses with search, pagination, add, edit,
   delete and case insensitive duplicate rejection, plus the pending request queue carrying all
   three PRD 16.3 actions.
@@ -218,6 +220,17 @@ would save, and the change was audited as `update_owner`. A credit adjustment of
 student wrote a ledger row and an audit row. The activity log lists all twelve admin actions
 taken so far in plain language.
 
+## Phase 7 verification (done against real data)
+
+Searching Delhi Technological University on the public landing page and on the Buy page returned
+the same six listings in the same order, including the boosted ones first. Both call one
+`buildFeedFilters` helper and one `fetchListingPage`, and a unit test asserts the two filter
+objects are identical apart from hiding your own listings.
+
+The bell showed three unread notifications from the real payment activity, the dot cleared when
+the panel was opened, and a mobile width check caught the panel overflowing the screen, now
+fixed with a max width.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -231,8 +244,10 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 7: the public landing page search, which must share the ordering engine with the Buy
-   page, and the remaining notification triggers.
-2. Phase 8: hardening, accessibility, Playwright end to end tests and a realistic seed script.
+1. Phase 8: hardening. Security headers and CSP, an accessibility pass, loading and error
+   states, a Playwright end to end suite, a realistic seed script and the index measurement that
+   was deferred from phase 3.
+2. Phase 9: launch. Production Supabase settings, the real APITxT send, domain and deploy, and a
+   handover guide for the owner.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.
