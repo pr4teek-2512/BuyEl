@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 to 5 are complete and verified end to end in the browser against the live database.
+Phases 0 to 6 are complete and verified end to end in the browser against the live database.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -56,6 +56,9 @@ Delivered this session:
 - Payments: plans and QR codes per price point, payment apps with their own wording for the UTR,
   the two step payment popup, transaction submission, admin accept and reject, and the three
   grants (credits, chat unlock, boost) with notifications and audit entries.
+- Admin panel is complete: user access with employee accounts and per page permissions, an OTP
+  gate on owner account changes, test account management, students with credit adjustment and
+  blocking, listing moderation, and an activity log.
 - Master lists admin page: colleges, branches and courses with search, pagination, add, edit,
   delete and case insensitive duplicate rejection, plus the pending request queue carrying all
   three PRD 16.3 actions.
@@ -206,6 +209,15 @@ The payment app labels follow the app chosen, exactly as the PRD requires: Googl
 the "UPI transaction ID" and warns against the "Google transaction ID", PhonePe asks for the
 "UTR", Paytm for the "UPI Ref. No.".
 
+## Phase 6 verification (done against real data)
+
+An employee with view only access to one page was created earlier and behaved correctly. The
+owner OTP gate was exercised end to end by pointing `ADMIN_OWNER_OTP_PHONE` at a test account
+number, so nothing was texted to the real number; the code was required before the owner record
+would save, and the change was audited as `update_owner`. A credit adjustment of +3 on a real
+student wrote a ledger row and an audit row. The activity log lists all twelve admin actions
+taken so far in plain language.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -219,8 +231,8 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 6: the remaining admin pages, which are users, listings, user access with employee
-   accounts and per page permissions, test account management, and the audit log viewer.
-2. Phase 7: the public landing search and the notification triggers.
+1. Phase 7: the public landing page search, which must share the ordering engine with the Buy
+   page, and the remaining notification triggers.
+2. Phase 8: hardening, accessibility, Playwright end to end tests and a realistic seed script.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

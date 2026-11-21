@@ -130,13 +130,25 @@ confirm the last step.
 
 - [x] 6.1 Admin auth, separate cookie, seeded owner account (done in phase 2)
 - [x] 6.2 Per page permission model and route guards (done in phase 2, verified with a view only employee)
-- [ ] 6.3 User Access page: create and edit employee admins, assign pages
-- [!] 6.4 Owner edit OTP verification (blocked on Q23)
-- [ ] 6.5 Test Accounts section: create, fixed OTP, paid services toggle, test mode, redo onboarding
-- [ ] 6.6 Users page: search, profile, credit balance, manual adjustment, block
-- [ ] 6.7 Listings page: moderate, force close, delete
-- [ ] 6.8 Dashboard counts, with test accounts excluded from statistics
-- [~] 6.9 Audit log is written on every admin action. The page to read it in the panel is still to build
+- [x] 6.3 User Access page: create and edit employee admins, with a view and edit tick per page
+- [x] 6.4 Owner account edits require an OTP to +917819812678
+- [x] 6.5 Test Accounts section: create, fixed OTP, paid services toggle, test mode, redo onboarding
+- [x] 6.6 Students page: search, profile, credit balance, manual adjustment with a reason, block and unblock
+- [x] 6.7 Listings page: moderate, close, reopen, remove, each notifying the seller
+- [x] 6.8 Dashboard counts, with test accounts left out of the student count
+- [x] 6.9 Activity log page showing every admin action in plain language
+
+Notes:
+
+- Blocking a student also revokes their open sessions, so they are signed out immediately.
+- A manual credit adjustment goes through the same ledger as a purchase, never a bare balance
+  edit, so the ledger always explains the balance.
+- Admin moderation can close a listing even when the seller has not unlocked chat. The seller's
+  own Close button still requires the unlock, exactly as the PRD says.
+- Payment platforms live on the Plans and QR codes page rather than having a page of their own,
+  since they are configured together. The permission key `payment_platforms` still exists.
+- The owner OTP was verified by pointing `ADMIN_OWNER_OTP_PHONE` at a test account number, so no
+  SMS was sent to the real number. The env file is back to +917819812678.
 
 ## Phase 7 - Public landing page and notifications
 
@@ -175,4 +187,4 @@ confirm the last step.
 | 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
 | 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0 to 5 are done and verified against the live database. The whole money loop works: buy credits, unlock chat, boost, verify, reject. Phase 6 (the remaining admin pages) is next.
+Phases 0 to 6 are done and verified against the live database. The admin panel is complete. Phase 7 (the public landing search and notification triggers) is next.
