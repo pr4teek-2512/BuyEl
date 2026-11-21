@@ -46,7 +46,7 @@ real-time chat without running a separate socket server.
 | ORM | Prisma | Typed schema, migrations, readable queries |
 | Realtime chat | Supabase Realtime (Postgres change streams) | Vercel serverless cannot hold WebSockets. Avoids a second always-on service |
 | Auth | Custom phone + OTP, JWT in httpOnly secure cookie, rotating refresh token | PRD requires OTP on every login. No third party auth needed |
-| OTP SMS | MSG91 (India, DLT registered templates) behind a provider adapter | Cheapest reliable Indian route. The adapter means Twilio or Fast2SMS can be swapped in one file |
+| OTP SMS | **APITxt** (owner's existing account) behind a provider adapter | Confirmed by the owner. The adapter keeps a `mock` provider for local development and lets any other gateway be swapped in one file |
 | File storage | Supabase Storage | QR images, payment platform logos, explanatory images |
 | Validation | Zod on every API boundary | Shared types between client and server |
 | Rate limiting | Upstash Redis (OTP sends, login attempts, chat opens) | Prevents SMS cost abuse |
@@ -306,29 +306,33 @@ Dependencies: phase 2 blocks 3, phase 3 blocks 4, phases 4 and 5 block 6, everyt
 
 Blocking questions are marked **[B]**. Work on the affected module will not start until answered.
 
+### Answered on 2026-11-21
+
+| Q | Answer |
+|---|---|
+| Q2 stack | Approved: Next.js 16, PostgreSQL on Supabase with Prisma, Supabase Realtime and Storage, deployed on Vercel |
+| Q3 OTP SMS | APITxt, the owner already has the account and API access. Development still runs against the `mock` provider until the credentials are shared |
+| Q6 credit semantics | **One credit per listing.** Contacting three listings from the same seller costs three credits |
+| Q7 locked seller chat | **No difference and no warning.** The buyer opens the chat and sends messages exactly as with any other listing. The seller simply cannot read or reply until they unlock that listing |
+
 ### Product and legal
 
 1. Should a terms page and disclaimer be included, and who provides the copy?
 
 ### Platform
 
-2. **[B]** Approve the stack in section 2 (Next.js, PostgreSQL, Supabase, Vercel, MSG91), or state
-   a preference for a self hosted VPS setup.
-3. **[B]** Who owns the SMS account and the DLT template registration (mandatory in India), and
-   what is the monthly OTP budget? Until that exists, development uses a mock SMS provider that
-   prints the OTP to the server log.
+2. ~~Approve the stack~~ **Answered: approved.**
+3. ~~SMS provider~~ **Answered: APITxt.** Still needed from the owner: the API key, sender id,
+   template id and the API documentation or a sample request, so the adapter can be wired.
 4. Expected scale in the first semester (users, listings, daily OTPs) so indexes and plans are sized.
 5. Domain name for the site, and for the admin panel.
 
 ### Credits and chat
 
-6. **[B]** One credit per **new seller**, or one credit per **listing**? The PRD says "contact a
-   new seller", but threads are per listing. If one seller has three listings, does contacting all
-   three cost one credit or three? Recommendation: per listing, because the chat count rule that
-   drives sorting is per listing.
-7. If a buyer opens a chat on a listing whose seller has not unlocked chat, the buyer spends a
-   credit and may never get a reply. Should the Chat button be disabled, show a warning, or refund
-   the credit automatically if the seller never unlocks? Recommendation: a clear warning first.
+6. ~~Credit per seller or per listing~~ **Answered: one credit per listing.**
+7. ~~Behaviour when the seller has not unlocked chat~~ **Answered: identical to any other listing.**
+   No warning, no block, no refund. The buyer spends the credit, opens the thread and sends
+   messages; the seller sees a locked thread until they pay to unlock that listing.
 8. Can buyers and sellers send images or files, or is chat text only for v1? Assumed text only.
 9. Should a thread stay accessible after a listing is closed or deleted? Assumed yes when closed,
    and read only when deleted.

@@ -18,8 +18,8 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 ## Phase 1 - Authentication
 
-- [!] 1.1 Pick and configure the SMS provider (blocked on Q3)
-- [ ] 1.2 SMS adapter interface with `msg91` and `mock` implementations
+- [ ] 1.1 APITxt integration (needs the API key, sender id, template id and API docs from the owner)
+- [ ] 1.2 SMS adapter interface with `apitxt` and `mock` implementations
 - [ ] 1.3 `otp_codes` table, send OTP endpoint, hashed codes, expiry, attempt counter
 - [ ] 1.4 Rate limiting: per number per hour and per day, per IP, resend cooldown
 - [ ] 1.5 Verify OTP endpoint, JWT access and refresh tokens, httpOnly cookies, session table
@@ -65,12 +65,12 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 ## Phase 4 - Chat and in-app currency
 
-- [!] 4.1 Confirm credit semantics, per seller or per listing (blocked on Q6)
+- [x] 4.1 Credit semantics confirmed: one credit per listing
 - [ ] 4.2 `credit_ledger` table, append only, cached balance on the user row
 - [ ] 4.3 Atomic chat open transaction: balance check, debit, thread create, chat count increment
 - [ ] 4.4 Push-to-bottom trigger at 3 chats (normal) and 4 chats (boosted)
 - [ ] 4.5 Insufficient credits state, link into the credit purchase flow
-- [!] 4.6 Warning or block when the seller has not unlocked chat (blocked on Q7)
+- [x] 4.6 Confirmed: buyer experience is identical whether or not the seller has unlocked chat. No warning, no block, no refund
 - [ ] 4.7 Chat page: Buy Chats and Sell Chats sub-tabs, thread list with course name and initials
 - [ ] 4.8 Conversation view, realtime send and receive through Supabase Realtime
 - [ ] 4.9 Seller locked state: Unlock Chat call to action instead of the composer
@@ -140,11 +140,9 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 | Task | Question |
 |---|---|
-| 1.1 | Q3 SMS provider ownership, DLT registration, budget |
+| 1.1 | APITxt credentials and API documentation from the owner (development proceeds on the mock provider meanwhile) |
 | 2.5 | Q16, Q18 seed data for colleges and courses, and what a Course means |
-| 4.1 | Q6 one credit per seller or per listing |
-| 4.6 | Q7 behaviour when the seller has not unlocked chat |
 | 5.3 | Q19 launch price points |
 | 6.4 | Q23 owner edit OTP |
 
-Everything in phase 0 can start as soon as the stack is approved (Q2).
+Stack approved on 2026-11-21, so phase 0 is clear to start. Nothing blocks phases 0, 1, 3 or 4.

@@ -47,28 +47,39 @@ Delivered this session:
 | Next.js 16 App Router, single repo for user site and admin panel | One deploy, shared types and services, faster delivery |
 | PostgreSQL with Prisma | Credit spends and payment grants need real transactions |
 | Supabase Realtime instead of Socket.IO | Vercel serverless cannot hold WebSocket connections, avoids a second always-on service |
-| MSG91 behind an SMS adapter | Cheapest reliable Indian OTP route, swappable in one file |
+| APITxt behind an SMS adapter | The owner already has the APITxt account and API access. The adapter keeps a mock provider for local development |
 | Two ordering keys (`normal_order_key` ascending, `boost_order_key` descending) plus one-shot push flags | Expresses all of the PRD sorting rules with a single indexed query and no background job |
 | Boost expiry evaluated at read time | No cron dependency, always correct |
 | Append only credit ledger with a cached balance | Auditable, prevents double spend under concurrency |
 | Unique transaction id across payment requests | Blocks replaying one UPI payment for several unlocks |
 
-## Open questions blocking work
+## Owner answers (2026-11-21)
 
-Full list in `PROJECT_PLAN.md` section 9. The blocking ones:
+1. Stack approved: Next.js 16, Supabase PostgreSQL with Prisma, Supabase Realtime and Storage,
+   Vercel.
+2. OTP is sent through **APITxt**, the owner's existing third party service. Still needed: API key,
+   sender id, template id and the API documentation. Development runs on the mock provider until
+   then.
+3. Credits: **one credit per listing**, not per seller. Three listings from one seller cost three.
+4. Locked seller chat: the buyer experience is **identical** whether or not the seller has unlocked
+   chat. No warning, no block, no refund. The seller just cannot read or reply until they unlock.
 
-1. Q2 stack approval (Next.js + Supabase + Vercel) or self hosted VPS.
-2. Q3 SMS provider ownership, DLT template registration, OTP budget.
-3. Q6 one credit per new seller or per listing.
-4. Q7 what happens when a buyer chats on a listing whose seller has not unlocked chat.
-5. Q19 launch price points for credit packs, unlocks and boosts.
+## Still open
 
-Also flagged, not technical: reselling course registrations may conflict with university policy,
-so a terms page and disclaimer are recommended (Q1).
+Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
+
+- Q16 and Q18: do colleges and courses start empty, and is a "Course" a subject or a degree
+  programme. Needed before the master list seed (phase 2).
+- Q19: launch price points for credit packs, seller unlocks and boosts. Needed before phase 5 go live.
+- Q23: whether owner account edits need an OTP, and to which number. Needed in phase 6.
+- Q1: terms page and disclaimer, since reselling course registrations may conflict with university
+  policy. Product and legal decision, not technical.
 
 ## Next steps
 
-1. Get answers to the five blocking questions above.
-2. Start Phase 0 (foundation and UI kit), which only needs Q2 answered.
-3. Phase 1 authentication with the mock SMS provider while the DLT registration is pending.
+1. Phase 0: scaffold the Next.js app, Tailwind white theme, UI kit, responsive shell with the
+   mobile bottom nav, Prisma and Supabase wiring.
+2. Phase 1: phone and OTP auth on the mock provider, with the APITxt adapter ready to receive
+   credentials.
+3. Phase 2 needs Q16 and Q18 answered before the seed script.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.
