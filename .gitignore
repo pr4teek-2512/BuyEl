@@ -11,3 +11,7 @@ src/generated/
 *.tsbuildinfo
 .vercel
 coverage/
+test-results/
+playwright-report/
+.playwright/
+.playwright/
