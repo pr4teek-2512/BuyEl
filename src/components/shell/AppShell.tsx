@@ -2,22 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, MessagesSquare, ShoppingBag, Tag } from "lucide-react";
+import { MessagesSquare, ShoppingBag, Tag } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
+import { NotificationBell, type ShellNotification } from "./NotificationBell";
 
 export type ShellUser = {
   initials: string;
   creditBalance: number;
 };
 
-export type ShellNotification = {
-  id: string;
-  title: string;
-  body: string;
-  createdAt: string;
-  unread: boolean;
-};
+export type { ShellNotification };
 
 const tabs = [
   { href: "/buy", label: "Buy", icon: ShoppingBag },
@@ -28,11 +23,12 @@ const tabs = [
 export function AppHeader({
   user,
   notifications,
+  unreadCount,
 }: {
   user: ShellUser;
   notifications: ShellNotification[];
+  unreadCount: number;
 }) {
-  const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/90 backdrop-blur">
@@ -51,40 +47,7 @@ export function AppHeader({
             <span className="text-xs font-medium">credits</span>
           </Link>
 
-          <details className="relative">
-            <summary className="flex size-9 cursor-pointer list-none items-center justify-center rounded-full border border-line text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
-              <span className="relative">
-                <Bell className="size-[18px]" />
-                {unreadCount > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-danger" />
-                ) : null}
-              </span>
-            </summary>
-
-            <div className="animate-fade-up absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-line bg-white shadow-xl shadow-ink/10">
-              <p className="border-b border-line px-4 py-2.5 text-sm font-semibold">
-                Notifications
-              </p>
-              {notifications.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-ink-muted">
-                  Nothing yet.
-                </p>
-              ) : (
-                <ul className="max-h-80 divide-y divide-line overflow-auto">
-                  {notifications.map((item) => (
-                    <li
-                      key={item.id}
-                      className={cn("px-4 py-3", item.unread && "bg-brand-soft/40")}
-                    >
-                      <p className="text-sm font-medium text-ink">{item.title}</p>
-                      <p className="mt-0.5 text-xs text-ink-soft">{item.body}</p>
-                      <p className="mt-1 text-[11px] text-ink-muted">{item.createdAt}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </details>
+          <NotificationBell notifications={notifications} unreadCount={unreadCount} />
 
           <Avatar initials={user.initials} size="sm" />
         </div>

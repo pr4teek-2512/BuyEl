@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/auth/session";
-import { prisma } from "@/server/db";
+import {
+  recentNotifications,
+  unreadCount as countUnreadNotifications,
+} from "@/server/services/notification.service";
 import { initials } from "@/lib/text";
 import { AppHeader, MobileNav } from "@/components/shell/AppShell";
 
@@ -8,12 +11,10 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  // PRD section 11: the bell shows only the latest 6 notifications.
-  const notifications = await prisma.notification.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+  const [notifications, unreadCount] = await Promise.all([
+    recentNotifications(user.id),
+    countUnreadNotifications(user.id),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -26,14 +27,10 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           id: item.id,
           title: item.title,
           body: item.body,
-          createdAt: item.createdAt.toLocaleString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          unread: item.readAt === null,
+          createdAt: item.createdLabel,
+          unread: item.unread,
         }))}
+        unreadCount={unreadCount}
       />
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-24 pt-4 sm:pb-10">{children}</main>
