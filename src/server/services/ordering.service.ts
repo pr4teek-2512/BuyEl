@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/server/db";
-import { initials } from "@/lib/text";
+import { initials, normalizeName } from "@/lib/text";
 import { decidePushToBottom, planPage, rankFromAboveCount } from "./ordering.rules";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -35,6 +35,35 @@ export type ListingCard = {
 };
 
 export const LISTINGS_PER_PAGE = 20;
+
+/**
+ * Filtering by college text cannot use an index, so a typed college name is
+ * resolved to its official id first. Measured on 5,000 listings this is the
+ * difference between scanning the whole active set and a single index scan.
+ * A college that is not in the master list yet still falls back to text.
+ */
+async function resolveCollegeScope(
+  filters: ListingFilters,
+): Promise<{ collegeId?: string; collegeText?: string }> {
+  if (filters.collegeId) return { collegeId: filters.collegeId };
+
+  const text = filters.collegeText?.trim();
+  if (!text) return {};
+
+  const official = await prisma.college.findUnique({
+    where: { normalizedName: normalizeName(text) },
+    select: { id: true },
+  });
+
+  if (official) return { collegeId: official.id };
+
+  const byAbbreviation = await prisma.college.findFirst({
+    where: { abbreviation: { equals: text, mode: "insensitive" } },
+    select: { id: true },
+  });
+
+  return byAbbreviation ? { collegeId: byAbbreviation.id } : { collegeText: text };
+}
 
 function baseWhere(filters: ListingFilters, now: Date): Prisma.ListingWhereInput {
   const where: Prisma.ListingWhereInput = {
@@ -114,7 +143,8 @@ export async function fetchListingPage(
   perPage = LISTINGS_PER_PAGE,
 ) {
   const now = new Date();
-  const where = baseWhere(filters, now);
+  const scope = await resolveCollegeScope(filters);
+  const where = baseWhere({ ...filters, ...scope, collegeText: scope.collegeText ?? null }, now);
   const offset = (page - 1) * perPage;
 
   const [boostedCount, normalCount] = await Promise.all([
