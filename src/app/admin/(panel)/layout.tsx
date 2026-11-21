@@ -8,6 +8,7 @@ import { AdminSignOut } from "./AdminSignOut";
 const BUILT: Record<string, string> = {
   dashboard: "/admin",
   master_lists: "/admin/master-lists",
+  plans: "/admin/plans",
 };
 
 export default async function AdminPanelLayout({ children }: LayoutProps<"/admin">) {
