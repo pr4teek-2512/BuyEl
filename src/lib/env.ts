@@ -49,10 +49,18 @@ export const env = {
     },
   },
   adminOwner: {
-    username: optional(process.env.ADMIN_OWNER_USERNAME, "prateekchauhan"),
-    password: optional(process.env.ADMIN_OWNER_PASSWORD, "Prateek@2512"),
-    name: optional(process.env.ADMIN_OWNER_NAME, "Prateek Chauhan"),
-    otpPhone: optional(process.env.ADMIN_OWNER_OTP_PHONE, "+917819812678"),
+    get username() {
+      return optional(process.env.ADMIN_OWNER_USERNAME, "prateekchauhan");
+    },
+    get password() {
+      return optional(process.env.ADMIN_OWNER_PASSWORD, "Prateek@2512");
+    },
+    get name() {
+      return optional(process.env.ADMIN_OWNER_NAME, "Prateek Chauhan");
+    },
+    get otpPhone() {
+      return optional(process.env.ADMIN_OWNER_OTP_PHONE, "+917819812678");
+    },
   },
   isProduction: process.env.NODE_ENV === "production",
 };

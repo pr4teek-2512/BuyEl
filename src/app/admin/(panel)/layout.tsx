@@ -11,6 +11,7 @@ const BUILT: Record<string, string> = {
   master_lists: "/admin/master-lists",
   plans: "/admin/plans",
   payments: "/admin/payments",
+  user_access: "/admin/user-access",
 };
 
 export default async function AdminPanelLayout({ children }: LayoutProps<"/admin">) {
