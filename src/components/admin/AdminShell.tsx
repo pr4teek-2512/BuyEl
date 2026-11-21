@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ClipboardList,
   CreditCard,
   LayoutDashboard,
   ListChecks,
@@ -31,6 +32,7 @@ const ICONS: Record<string, typeof LayoutDashboard> = {
   users: Users,
   listings: Tags,
   user_access: ShieldCheck,
+  audit: ClipboardList,
 };
 
 export function AdminSidebar({

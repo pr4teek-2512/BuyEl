@@ -12,6 +12,9 @@ const BUILT: Record<string, string> = {
   plans: "/admin/plans",
   payments: "/admin/payments",
   user_access: "/admin/user-access",
+  users: "/admin/users",
+  listings: "/admin/listings",
+  payment_platforms: "/admin/plans",
 };
 
 export default async function AdminPanelLayout({ children }: LayoutProps<"/admin">) {
@@ -23,7 +26,9 @@ export default async function AdminPanelLayout({ children }: LayoutProps<"/admin
     canView(admin, "payments") ? countPendingPayments() : Promise.resolve(0),
   ]);
 
-  const items: AdminNavItem[] = ADMIN_PAGES.filter((page) => canView(admin, page.key)).map(
+  const items: AdminNavItem[] = ADMIN_PAGES.filter(
+    (page) => canView(admin, page.key) && page.key !== "payment_platforms",
+  ).map(
     (page) => ({
       href: BUILT[page.key] ?? `/admin/${page.key.replace(/_/g, "-")}`,
       label: page.label,
@@ -37,6 +42,15 @@ export default async function AdminPanelLayout({ children }: LayoutProps<"/admin
       available: Boolean(BUILT[page.key]),
     }),
   );
+
+  if (canView(admin, "user_access")) {
+    items.push({
+      href: "/admin/audit",
+      label: "Activity log",
+      pageKey: "audit",
+      available: true,
+    });
+  }
 
   return (
     <div className="flex min-h-dvh bg-surface-soft">
