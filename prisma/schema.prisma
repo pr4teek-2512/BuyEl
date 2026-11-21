@@ -1,0 +1,548 @@
+// BuyEl - university course marketplace
+// Schema follows PROJECT_PLAN.md section 4.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserStatus {
+  active
+  blocked
+}
+
+enum BranchLevel {
+  UG
+  PG
+}
+
+enum MasterListType {
+  college
+  branch
+  course
+}
+
+enum MasterRequestStatus {
+  pending
+  added
+  ignored
+  modified_user_only
+}
+
+enum ListingStatus {
+  active
+  closed
+  deleted
+}
+
+enum SenderRole {
+  buyer
+  seller
+}
+
+enum CreditReason {
+  purchase
+  chat_open
+  admin_adjust
+  refund
+}
+
+enum PlanCategory {
+  credits
+  seller_chat_unlock
+  boost
+}
+
+enum PaymentTargetType {
+  wallet
+  listing_unlock
+  listing_boost
+}
+
+enum PaymentStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum AdminRole {
+  owner
+  employee
+}
+
+enum OtpPurpose {
+  register
+  login
+  admin_owner_edit
+}
+
+enum NotificationType {
+  payment_accepted
+  payment_rejected
+  boost_expired
+  entry_corrected
+  system
+}
+
+// ---------------------------------------------------------------------------
+// Identity and access
+// ---------------------------------------------------------------------------
+
+model User {
+  id             String     @id @default(cuid())
+  phone          String     @unique
+  name           String
+  lastName       String?    @map("last_name")
+  graduationYear Int        @map("graduation_year")
+
+  // Master list pairing: id when the value matches an official entry,
+  // text always holds exactly what this user sees.
+  collegeId   String? @map("college_id")
+  collegeText String  @map("college_text")
+  branchId    String? @map("branch_id")
+  branchText  String  @map("branch_text")
+
+  creditBalance Int        @default(0) @map("credit_balance")
+  status        UserStatus @default(active)
+  isTestAccount Boolean    @default(false) @map("is_test_account")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  college       College?             @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  branch        Branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  listings      Listing[]
+  buyerThreads  ChatThread[]         @relation("BuyerThreads")
+  sellerThreads ChatThread[]         @relation("SellerThreads")
+  creditEntries CreditLedgerEntry[]
+  payments      PaymentRequest[]
+  notifications Notification[]
+  sessions      Session[]
+  masterRequests MasterListRequest[]
+
+  @@index([collegeId])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Session {
+  id               String    @id @default(cuid())
+  userId           String    @map("user_id")
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  userAgent        String?   @map("user_agent")
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model OtpCode {
+  id         String     @id @default(cuid())
+  phone      String
+  codeHash   String     @map("code_hash")
+  purpose    OtpPurpose @default(login)
+  expiresAt  DateTime   @map("expires_at")
+  attempts   Int        @default(0)
+  consumedAt DateTime?  @map("consumed_at")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  @@index([phone, createdAt])
+  @@map("otp_codes")
+}
+
+/// Generic DB backed throttle. Key examples: "otp:send:+919999999999", "otp:verify:ip:1.2.3.4".
+model RateLimit {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now()) @map("window_start")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("rate_limits")
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         AdminRole @default(employee)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  permissions AdminPermission[]
+  auditLogs   AdminAuditLog[]
+  reviewed    PaymentRequest[]  @relation("ReviewedBy")
+  resolved    MasterListRequest[] @relation("ResolvedBy")
+
+  @@map("admin_users")
+}
+
+model AdminPermission {
+  id          String  @id @default(cuid())
+  adminUserId String  @map("admin_user_id")
+  pageKey     String  @map("page_key")
+  canView     Boolean @default(true) @map("can_view")
+  canEdit     Boolean @default(false) @map("can_edit")
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@unique([adminUserId, pageKey])
+  @@map("admin_permissions")
+}
+
+model AdminSession {
+  id               String    @id @default(cuid())
+  adminUserId      String    @map("admin_user_id")
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@index([adminUserId])
+  @@map("admin_sessions")
+}
+
+model TestAccount {
+  id                    String   @id @default(cuid())
+  phone                 String   @unique
+  name                  String
+  fixedOtp              String   @map("fixed_otp")
+  canAccessPaidServices Boolean  @default(false) @map("can_access_paid_services")
+  testModeOn            Boolean  @default(true) @map("test_mode_on")
+  redoOnboarding        Boolean  @default(false) @map("redo_onboarding")
+  mockProfile           Json?    @map("mock_profile")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("test_accounts")
+}
+
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminUserId String?  @map("admin_user_id")
+  action      String
+  entity      String
+  entityId    String?  @map("entity_id")
+  beforeJson  Json?    @map("before_json")
+  afterJson   Json?    @map("after_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("admin_audit_log")
+}
+
+// ---------------------------------------------------------------------------
+// Master lists
+// ---------------------------------------------------------------------------
+
+model College {
+  id             String   @id @default(cuid())
+  name           String
+  abbreviation   String
+  normalizedName String   @unique @map("normalized_name")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  users    User[]
+  listings Listing[]
+  courses  Course[]
+
+  @@index([abbreviation])
+  @@map("colleges")
+}
+
+model Branch {
+  id             String      @id @default(cuid())
+  name           String
+  level          BranchLevel
+  normalizedName String      @unique @map("normalized_name")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  users User[]
+
+  @@map("branches")
+}
+
+/// A Course is a subject level course, for example "Data Structures CS201".
+model Course {
+  id             String   @id @default(cuid())
+  name           String
+  normalizedName String   @map("normalized_name")
+  collegeId      String?  @map("college_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  college  College?  @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  listings Listing[]
+
+  @@unique([normalizedName, collegeId])
+  @@index([normalizedName])
+  @@map("courses")
+}
+
+model MasterListRequest {
+  id              String              @id @default(cuid())
+  listType        MasterListType      @map("list_type")
+  submittedText   String              @map("submitted_text")
+  normalizedText  String              @map("normalized_text")
+  submittedByUserId String?           @map("submitted_by_user_id")
+  /// Set when the submission came from a listing field rather than a profile field.
+  listingId       String?             @map("listing_id")
+  status          MasterRequestStatus @default(pending)
+  resolvedText    String?             @map("resolved_text")
+  resolvedByAdminId String?           @map("resolved_by_admin_id")
+  resolvedAt      DateTime?           @map("resolved_at")
+  createdAt       DateTime            @default(now()) @map("created_at")
+
+  submittedBy User?      @relation(fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  resolvedBy  AdminUser? @relation("ResolvedBy", fields: [resolvedByAdminId], references: [id], onDelete: SetNull)
+  listing     Listing?   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listType, status])
+  @@map("master_list_requests")
+}
+
+// ---------------------------------------------------------------------------
+// Listings
+// ---------------------------------------------------------------------------
+
+model Listing {
+  id       String @id @default(cuid())
+  sellerId String @map("seller_id")
+
+  // Write once after confirmation.
+  courseId    String? @map("course_id")
+  courseText  String  @map("course_text")
+  collegeId   String? @map("college_id")
+  collegeText String  @map("college_text")
+
+  price  Int
+  status ListingStatus @default(active)
+
+  chatUnlockedAt DateTime? @map("chat_unlocked_at")
+
+  isBoosted      Boolean   @default(false) @map("is_boosted")
+  boostExpiresAt DateTime? @map("boost_expires_at")
+
+  distinctBuyerChatCount Int @default(0) @map("distinct_buyer_chat_count")
+
+  /// Normal bucket sorts ASC: oldest on top, newest at the very bottom.
+  normalOrderKey DateTime @default(now()) @map("normal_order_key")
+  /// Boosted bucket sorts DESC: newest boost first.
+  boostOrderKey  DateTime? @map("boost_order_key")
+
+  pushedToBottomNormal Boolean @default(false) @map("pushed_to_bottom_normal")
+  pushedToBottomBoost  Boolean @default(false) @map("pushed_to_bottom_boost")
+
+  closedAt  DateTime? @map("closed_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  seller   User                @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  course   Course?             @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  college  College?            @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  boosts   ListingBoost[]
+  threads  ChatThread[]
+  payments PaymentRequest[]
+  masterRequests MasterListRequest[]
+
+  @@index([status, isBoosted, boostOrderKey])
+  @@index([status, normalOrderKey])
+  @@index([collegeId, status])
+  @@index([courseId, status])
+  @@index([sellerId])
+  @@map("listings")
+}
+
+model ListingBoost {
+  id               String   @id @default(cuid())
+  listingId        String   @map("listing_id")
+  planId           String?  @map("plan_id")
+  paymentRequestId String?  @map("payment_request_id")
+  days             Int
+  startsAt         DateTime @map("starts_at")
+  endsAt           DateTime @map("ends_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  plan    Plan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([listingId])
+  @@map("listing_boosts")
+}
+
+// ---------------------------------------------------------------------------
+// Chat and credits
+// ---------------------------------------------------------------------------
+
+model ChatThread {
+  id        String @id @default(cuid())
+  listingId String @map("listing_id")
+  buyerId   String @map("buyer_id")
+  sellerId  String @map("seller_id")
+
+  buyerCreditEntryId String? @map("buyer_credit_entry_id")
+
+  lastMessageAt    DateTime? @map("last_message_at")
+  buyerLastReadAt  DateTime? @map("buyer_last_read_at")
+  sellerLastReadAt DateTime? @map("seller_last_read_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer    User      @relation("BuyerThreads", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller   User      @relation("SellerThreads", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([listingId, buyerId])
+  @@index([buyerId, lastMessageAt])
+  @@index([sellerId, lastMessageAt])
+  @@map("chat_threads")
+}
+
+model Message {
+  id         String     @id @default(cuid())
+  threadId   String     @map("thread_id")
+  senderRole SenderRole @map("sender_role")
+  body       String
+  readAt     DateTime?  @map("read_at")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@map("messages")
+}
+
+model CreditLedgerEntry {
+  id           String       @id @default(cuid())
+  userId       String       @map("user_id")
+  delta        Int
+  reason       CreditReason
+  refId        String?      @map("ref_id")
+  balanceAfter Int          @map("balance_after")
+  note         String?
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("credit_ledger")
+}
+
+// ---------------------------------------------------------------------------
+// Payments
+// ---------------------------------------------------------------------------
+
+model PaymentPlatform {
+  id                  String   @id @default(cuid())
+  name                String   @unique
+  logoUrl             String?  @map("logo_url")
+  utrTerm             String   @map("utr_term")
+  appTxnTerm          String?  @map("app_txn_term")
+  explanatoryImageUrl String?  @map("explanatory_image_url")
+  sortOrder           Int      @default(0) @map("sort_order")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  payments PaymentRequest[]
+
+  @@map("payment_platforms")
+}
+
+model Plan {
+  id             String       @id @default(cuid())
+  category       PlanCategory
+  label          String
+  price          Int
+  creditsGranted Int?         @map("credits_granted")
+  boostDays      Int?         @map("boost_days")
+  qrImageUrl     String?      @map("qr_image_url")
+  qrUpiId        String?      @map("qr_upi_id")
+  isActive       Boolean      @default(true) @map("is_active")
+  sortOrder      Int          @default(0) @map("sort_order")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  payments PaymentRequest[]
+  boosts   ListingBoost[]
+
+  @@index([category, isActive])
+  @@map("plans")
+}
+
+model PaymentRequest {
+  id         String            @id @default(cuid())
+  userId     String            @map("user_id")
+  planId     String?           @map("plan_id")
+  platformId String?           @map("platform_id")
+  amount     Int
+  txnId      String            @unique @map("txn_id")
+  targetType PaymentTargetType @map("target_type")
+  targetListingId String?      @map("target_listing_id")
+  status     PaymentStatus     @default(pending)
+
+  reviewedByAdminId String?   @map("reviewed_by_admin_id")
+  reviewedAt        DateTime? @map("reviewed_at")
+  rejectReason      String?   @map("reject_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan          Plan?            @relation(fields: [planId], references: [id], onDelete: SetNull)
+  platform      PaymentPlatform? @relation(fields: [platformId], references: [id], onDelete: SetNull)
+  targetListing Listing?         @relation(fields: [targetListingId], references: [id], onDelete: SetNull)
+  reviewedBy    AdminUser?       @relation("ReviewedBy", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@map("payment_requests")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  refId     String?          @map("ref_id")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// Platform settings (single row)
+// ---------------------------------------------------------------------------
+
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}

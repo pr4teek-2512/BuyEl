@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/*
+  BuyEl design tokens.
+  PRD section 11: predominantly white, clean, minimal, modern.
+  A single violet accent carries actions, matching the admin reference screens.
+*/
+@theme {
+  --color-ink: #0f1020;
+  --color-ink-soft: #4a4c63;
+  --color-ink-muted: #8a8ca3;
+
+  --color-surface: #ffffff;
+  --color-surface-soft: #fafaff;
+  --color-line: #ecedf5;
+  --color-line-strong: #dcdeeb;
+
+  --color-brand: #6d35e0;
+  --color-brand-dark: #5826c4;
+  --color-brand-soft: #f3eeff;
+
+  --color-success: #0f9d6f;
+  --color-success-soft: #e6f7f1;
+  --color-danger: #d93a4a;
+  --color-danger-soft: #fdecee;
+  --color-warning: #c47a08;
+  --color-warning-soft: #fdf4e3;
+
+  --radius-card: 16px;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Hide scrollbars on the horizontal tab strips without losing scrollability. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes buyel-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: buyel-fade-up 180ms ease-out both;
+}
