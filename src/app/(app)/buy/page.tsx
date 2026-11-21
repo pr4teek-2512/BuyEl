@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
 import { requireUser } from "@/server/auth/session";
 import { fetchListingPage } from "@/server/services/ordering.service";
+import { existingThreadListingIds } from "@/server/services/chat.service";
 import { EmptyState, PageHeading } from "@/components/ui/Primitives";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { cn } from "@/lib/cn";
 import { BuySearch } from "./BuySearch";
+import { ChatButton } from "./ChatButton";
 
 export const metadata = { title: "Buy - BuyEl" };
 
@@ -37,6 +38,11 @@ export default async function BuyPage({
       excludeSellerId: user.id,
     },
     page,
+  );
+
+  const openThreads = await existingThreadListingIds(
+    user.id,
+    cards.map((card) => card.id),
   );
 
   function hrefFor(next: Record<string, string | number>) {
@@ -101,13 +107,10 @@ export default async function BuyPage({
                 soldOut={tab === "soldout"}
                 action={
                   tab === "available" ? (
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ink-muted"
-                      title="Opening a chat costs 1 credit. This arrives in the next build step."
-                    >
-                      <MessageSquare className="size-4" />
-                      Chat
-                    </span>
+                    <ChatButton
+                      listingId={listing.id}
+                      alreadyOpen={openThreads.has(listing.id)}
+                    />
                   ) : undefined
                 }
               />

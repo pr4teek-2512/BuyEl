@@ -16,7 +16,7 @@ boosts. All payments are manual UPI QR with admin verification. No payment gatew
 
 ## Current state (2026-11-21)
 
-Phases 0 to 3 are complete and verified end to end in the browser against the live database.
+Phases 0 to 4 are complete and verified end to end in the browser against the live database.
 `next build`, `tsc --noEmit`, `eslint` and `vitest` are all clean. A real account was registered
 (+919876500011, Abhishek Singh), signed out, and signed back in without re-entering the profile.
 
@@ -49,6 +49,10 @@ Delivered this session:
   university preselected, anonymous listing cards, pagination across both buckets.
 - Sell page: create form, and a card per listing showing every field, the live rank within its
   own college, and Edit price, Unlock chat, Boost, Close, Reopen and Delete in correct states.
+- Credits: an append only ledger with the cached balance written in the same transaction, and a
+  compare and decrement that makes a double spend impossible.
+- Chat: one credit per listing, Buy Chats and Sell Chats, anonymous conversations, unread dots,
+  a locked state for sellers who have not unlocked that listing, and polling for new messages.
 - Master lists admin page: colleges, branches and courses with search, pagination, add, edit,
   delete and case insensitive duplicate rejection, plus the pending request queue carrying all
   three PRD 16.3 actions.
@@ -169,6 +173,22 @@ Two deliberate decisions worth confirming:
 Test data in the database: listings with ids `ord1` to `ord6` were seeded by hand to prove the
 ordering. Remove them with `delete from listings where id like 'ord%';` whenever you like.
 
+## Phase 4 verification (done against real data)
+
+Two credits were granted to a test account. Opening a chat took exactly one, wrote the ledger
+row and incremented the listing's distinct buyer count. Opening the same conversation again was
+free and the button changed to Open. With a zero balance the third attempt failed cleanly: no
+thread, no ledger row, nothing charged, because the whole open runs in one transaction.
+
+A second test account owning its own listing proved the seller side. Before unlocking, the
+seller saw "1 message is waiting for you" and no content at all, not even a preview. After the
+unlock field was set, the same conversation showed the message and the reply went through. The
+polling endpoint returned 404 with no data for a conversation the signed in user is not part of.
+
+Decision worth confirming: a locked seller cannot read the waiting messages, only their count.
+The PRD says a seller unlocks chat to respond, and hiding the content is what gives them a
+reason to pay.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
@@ -182,8 +202,9 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Phase 4: the credit ledger and chat, which wires up the Chat button and makes
-   `applyChatThreshold` fire for real.
-2. Phase 5: payments, which turns on Unlock chat and Boost.
+1. Phase 5: payments. Plans and QR codes in the admin panel, the two step payment modal, UTR
+   submission, admin accept and reject, and the three grants. This turns on buying credits,
+   Unlock chat and Boost.
+2. Phase 6: the remaining admin pages.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

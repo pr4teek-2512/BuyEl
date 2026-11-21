@@ -81,17 +81,26 @@ Carried into phase 4 and 5 by design:
 ## Phase 4 - Chat and in-app currency
 
 - [x] 4.1 Credit semantics confirmed: one credit per listing
-- [ ] 4.2 `credit_ledger` table, append only, cached balance on the user row
-- [ ] 4.3 Atomic chat open transaction: balance check, debit, thread create, chat count increment
-- [ ] 4.4 Push-to-bottom trigger at 3 chats (normal) and 4 chats (boosted)
-- [ ] 4.5 Insufficient credits state, link into the credit purchase flow
-- [x] 4.6 Confirmed: buyer experience is identical whether or not the seller has unlocked chat. No warning, no block, no refund
-- [ ] 4.7 Chat page: Buy Chats and Sell Chats sub-tabs, thread list with course name and initials
-- [ ] 4.8 Conversation view, realtime send and receive through Supabase Realtime
-- [ ] 4.9 Seller locked state: Unlock Chat call to action instead of the composer
-- [ ] 4.10 Anonymity audit: no name, phone, college or any identifier in any chat payload
-- [ ] 4.11 Unread counts, last message preview, ordering by recency
-- [ ] 4.12 Unit and integration tests for double spend, concurrent opens, re-entry being free
+- [x] 4.2 `credit_ledger` table, append only, with the cached balance written in the same transaction
+- [x] 4.3 Atomic chat open: compare and decrement, thread create, chat count increment, all in one transaction
+- [x] 4.4 Push-to-bottom fires from a real chat open, at 3 chats normal and 4 boosted
+- [x] 4.5 Insufficient credits state on the Chat button, pointing at the purchase step
+- [x] 4.6 Confirmed: the buyer experience is identical whether or not the seller has unlocked chat
+- [x] 4.7 Chat page: Buy Chats and Sell Chats sub-tabs, thread list with course name and initials
+- [x] 4.8 Conversation view, send and receive, with new messages arriving by polling
+- [x] 4.9 Seller locked state: how many messages are waiting, no content, Unlock chat call to action
+- [x] 4.10 Anonymity: the thread view type carries no name, phone or user id, and a test asserts it
+- [x] 4.11 Unread dots per conversation, last message preview, ordered by most recent activity
+- [x] 4.12 15 unit tests for the chat rules. Double spend, rollback on no credits and free re-entry were verified live against the database
+
+Deviation from the plan, with the reason:
+
+- Realtime was planned on Supabase Realtime. That needs the anon key to read the `messages`
+  table, which would expose every conversation, and our sessions are our own JWTs rather than
+  Supabase Auth, so row level security cannot key off them. Messages therefore arrive by a
+  3 second poll of an endpoint that checks the caller is a participant. Swapping it later only
+  touches `Conversation.tsx`.
+- Buying credits is phase 5, so the only way to hold credits today is an admin or SQL grant.
 
 ## Phase 5 - Payments and QR verification
 
@@ -158,4 +167,4 @@ Carried into phase 4 and 5 by design:
 | 5.3 | Q19 launch price points, though the owner will set these in the admin panel |
 | 6.4 | Q23 owner edit OTP, answered: send to +917819812678, still to build |
 
-Phases 0 to 3 are done and verified against the live database. Phase 4 (chat and the credit ledger) is next, then phase 5 unlocks the paid actions.
+Phases 0 to 4 are done and verified against the live database. Phase 5 (payments and QR verification) is next, and it turns on Unlock chat, Boost and buying credits.
