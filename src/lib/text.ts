@@ -59,6 +59,18 @@ export function normalizePhone(input: string): string | null {
   return null;
 }
 
+/**
+ * Lenient E.164 form used only to look up test accounts. PRD 10.5 allows an
+ * admin to create a test account on a number that is not a real mobile number,
+ * for example +910000000001, which `normalizePhone` correctly rejects.
+ */
+export function toLooseE164(input: string): string | null {
+  const digits = input.replace(/\D/g, "");
+  if (digits.length < 8 || digits.length > 15) return null;
+  if (digits.length === 10) return `+91${digits}`;
+  return `+${digits}`;
+}
+
 export function phoneWithoutCountryCode(e164: string): string {
   return e164.replace(/^\+91/, "");
 }

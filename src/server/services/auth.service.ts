@@ -1,15 +1,31 @@
 import "server-only";
 import { prisma } from "@/server/db";
-import { normalizePhone } from "@/lib/text";
+import { normalizePhone, toLooseE164 } from "@/lib/text";
 import { sendOtp, verifyOtp } from "./otp.service";
 import { resolveBranch, resolveCollege } from "./masterlist.service";
+
+/**
+ * Resolves what the user typed into the phone we store. A real mobile number
+ * must pass the strict Indian check; a number that matches an existing test
+ * account is accepted as it is, because test accounts need not be real.
+ */
+export async function resolvePhoneInput(rawPhone: string): Promise<string | null> {
+  const strict = normalizePhone(rawPhone);
+  if (strict) return strict;
+
+  const loose = toLooseE164(rawPhone);
+  if (!loose) return null;
+
+  const testAccount = await prisma.testAccount.findUnique({ where: { phone: loose } });
+  return testAccount ? loose : null;
+}
 
 export type RequestOtpResult =
   | { ok: true; phone: string; isNewUser: boolean; testAccount: boolean; devCode?: string }
   | { ok: false; error: string };
 
 export async function requestOtpForPhone(rawPhone: string): Promise<RequestOtpResult> {
-  const phone = normalizePhone(rawPhone);
+  const phone = await resolvePhoneInput(rawPhone);
   if (!phone) {
     return { ok: false, error: "Enter a valid 10 digit Indian mobile number." };
   }
@@ -47,7 +63,7 @@ export async function verifyOtpForPhone(
   rawPhone: string,
   code: string,
 ): Promise<VerifyResult> {
-  const phone = normalizePhone(rawPhone);
+  const phone = await resolvePhoneInput(rawPhone);
   if (!phone) return { ok: false, error: "Enter a valid mobile number." };
   if (!/^\d{6}$/.test(code)) return { ok: false, error: "Enter the 6 digit code." };
 
@@ -75,7 +91,7 @@ export type RegistrationInput = {
 };
 
 export async function completeRegistration(input: RegistrationInput) {
-  const phone = normalizePhone(input.phone);
+  const phone = await resolvePhoneInput(input.phone);
   if (!phone) throw new Error("Invalid phone number");
 
   const existing = await prisma.user.findUnique({ where: { phone } });

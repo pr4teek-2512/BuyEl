@@ -25,17 +25,28 @@ export const env = {
     anonKey: optional(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
     serviceRoleKey: optional(process.env.SUPABASE_SERVICE_ROLE_KEY),
   },
+  // Read lazily so a changed .env takes effect without a rebuild.
   sms: {
-    provider: optional(process.env.SMS_PROVIDER, "mock") as "mock" | "apitxt",
-    apiKey: optional(process.env.APITXT_API_KEY),
-    requestUrl: optional(process.env.APITXT_REQUEST_URL),
-    requestMethod: optional(process.env.APITXT_REQUEST_METHOD, "GET").toUpperCase(),
-    senderId: optional(process.env.APITXT_SENDER_ID),
-    templateId: optional(process.env.APITXT_TEMPLATE_ID),
-    messageTemplate: optional(
-      process.env.OTP_MESSAGE_TEMPLATE,
-      "{OTP} is your BuyEl verification code. It is valid for 5 minutes. Do not share it with anyone.",
-    ),
+    get provider() {
+      return optional(process.env.SMS_PROVIDER, "mock") as "mock" | "apitxt";
+    },
+    get apiKey() {
+      return optional(process.env.APITXT_API_KEY);
+    },
+    get endpoint() {
+      return optional(process.env.APITXT_ENDPOINT, "https://apitxt.com/api/sendOTP");
+    },
+    /** sms (default), whatsapp or voice. */
+    get channel() {
+      return optional(process.env.APITXT_CHANNEL, "sms");
+    },
+    /** Optional SMS template id from the APITxT dashboard. */
+    get templateId() {
+      return optional(process.env.APITXT_TEMPLATE_ID);
+    },
+    get country() {
+      return optional(process.env.APITXT_COUNTRY, "91");
+    },
   },
   adminOwner: {
     username: optional(process.env.ADMIN_OWNER_USERNAME, "prateekchauhan"),

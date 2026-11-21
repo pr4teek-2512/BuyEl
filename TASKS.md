@@ -18,8 +18,8 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 ## Phase 1 - Authentication
 
-- [~] 1.1 APITxt wired through a URL template. Needs the send URL, sender id and template id from the owner, then flip `SMS_PROVIDER=apitxt`
-- [x] 1.2 SMS adapter interface with `apitxt` and `mock` implementations
+- [x] 1.1 APITxT integrated against https://apitxt.com/api/sendOTP and switched on (`SMS_PROVIDER=apitxt`), verified live: valid key accepted, bad key rejected, rate limit handled
+- [x] 1.2 SMS adapter interface with `apitxt` and `mock` implementations, pure request builder and response reader under unit test
 - [x] 1.3 `otp_codes` table, send OTP, bcrypt hashed codes, 5 minute expiry, attempt counter
 - [x] 1.4 Rate limiting: 60s resend cooldown, 3 per hour, 10 per day, 10 verify attempts per 10 minutes
 - [x] 1.5 Verify OTP, JWT access token and rotating refresh token in httpOnly cookies, session table
@@ -140,9 +140,8 @@ Blocked items reference the question numbers in `PROJECT_PLAN.md` section 9.
 
 | Task | Question |
 |---|---|
-| 1.1 | APITxt send URL and its parameter names (development runs on the mock provider meanwhile) |
-| 2.5 | Q16, Q18 seed data for colleges and courses, and what a Course means |
+| 2.5 | Q18 is answered (Course is a subject). Nothing blocks this now |
 | 5.3 | Q19 launch price points |
 | 6.4 | Q23 owner edit OTP |
 
-Phases 0 and 1 are done and verified against the live database. Phase 2 is next.
+Phases 0 and 1 are done, verified against the live database, and OTP now goes through APITxT. Phase 2 is next.

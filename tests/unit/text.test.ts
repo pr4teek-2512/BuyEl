@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   deriveAbbreviation,
+  toLooseE164,
   initials,
   maskPhone,
   normalizeName,
@@ -67,6 +68,18 @@ describe("normalizePhone", () => {
     expect(normalizePhone("12345")).toBeNull();
     expect(normalizePhone("1234567890")).toBeNull();
     expect(normalizePhone("abcdefghij")).toBeNull();
+  });
+});
+
+describe("toLooseE164", () => {
+  it("accepts a test account number that is not a real mobile", () => {
+    expect(toLooseE164("0000000001")).toBe("+910000000001");
+    expect(toLooseE164("+91 0000000001")).toBe("+910000000001");
+  });
+
+  it("still rejects something that cannot be a number at all", () => {
+    expect(toLooseE164("123")).toBeNull();
+    expect(toLooseE164("")).toBeNull();
   });
 });
 

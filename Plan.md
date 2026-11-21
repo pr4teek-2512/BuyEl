@@ -87,6 +87,29 @@ Delivered this session:
 | APITxt driven by a URL template in the env file | Their request shape is not publicly documented, so the exact URL can be dropped in with no code change |
 | Colleges and courses seeded empty, branches pre seeded | Owner confirmed on 2026-11-21 |
 
+## OTP delivery (APITxT)
+
+Integrated against the documented unified OTP endpoint
+(https://apitxt.com/developer/otp-api):
+
+    POST https://apitxt.com/api/sendOTP   (application/x-www-form-urlencoded)
+    authkey, mobile (digits with country code), otp, channel=sms, country=91
+    template_id optional; omitted means the account default template
+
+APITxT renders the message from its own template, which is what carries the DLT
+registration, so BuyEl never sends message text and needs no DLT template of its own.
+`SMS_PROVIDER=apitxt` is live. Set it to `mock` for free local testing, which prints the
+code and shows it on the login screen.
+
+Verified against the live API during integration: a valid key with a well formed number
+returns `{"status":"success","data":{"request_id":...}}`, a malformed number returns HTTP 400,
+a bad key returns HTTP 401 `AUTH_FAILED`, and repeat sends return HTTP 429. All four shapes
+are covered by unit tests. Their own limit is 3 OTPs per number per minute, which sits above
+our 60 second resend cooldown.
+
+Test accounts never reach APITxT. `+910000000001` with fixed OTP `010010` exists in the
+database for development.
+
 ## Database connection (important)
 
 Supabase project `hpdanwmpzmviamplunqa` is in **ap-southeast-1**, and its direct host
@@ -112,9 +135,7 @@ Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Ou
 
 ## Next steps
 
-1. Get the APITxt send URL and parameter names, then set `SMS_PROVIDER=apitxt`. The owner's view
-   is that no DLT template of our own is needed because APITxt is a reseller on its own
-   registration, which is plausible; only their endpoint shape is still required.
-2. Phase 2: the admin review queue UI for the three master lists.
+1. Phase 2: the admin review queue UI for the three master lists.
+2. Phase 3: listings, the Buy page and the ordering engine.
 3. Phase 2 admin review queue UI, then phase 3 listings, Buy page and the ordering engine.
 4. Keep `TASKS.md` statuses current and update this file after every completed prompt.

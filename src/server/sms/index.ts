@@ -1,11 +1,13 @@
 import "server-only";
 import { env } from "@/lib/env";
-import { phoneWithoutCountryCode } from "@/lib/text";
+import { APITXT_ENDPOINT, buildOtpRequest, interpretResponse } from "./apitxt";
 
 export type SendResult = {
   ok: boolean;
   providerId?: string;
   error?: string;
+  /** True when the same request could succeed if tried again shortly. */
+  retryable?: boolean;
 };
 
 export interface SmsProvider {
@@ -13,12 +15,9 @@ export interface SmsProvider {
   sendOtp(phone: string, code: string): Promise<SendResult>;
 }
 
-function buildMessage(code: string): string {
-  return env.sms.messageTemplate.replaceAll("{OTP}", code);
-}
-
 /**
- * Development provider. Writes the OTP to the server log instead of sending it.
+ * Development provider. Writes the OTP to the server log instead of sending it,
+ * and the login screen shows it so the flow can be exercised without credits.
  */
 export const mockProvider: SmsProvider = {
   name: "mock",
@@ -28,60 +27,58 @@ export const mockProvider: SmsProvider = {
   },
 };
 
-/**
- * APITxt provider.
- *
- * APITxt does not publish an openly documented request shape, so the request is
- * driven entirely by APITXT_REQUEST_URL, a template holding these placeholders:
- *
- *   {API_KEY} {PHONE} {PHONE_NO_CC} {MESSAGE} {OTP} {SENDER} {TEMPLATE_ID}
- *
- * Each substituted value is URL encoded. For a POST, the same placeholders are
- * filled into APITXT_REQUEST_BODY as JSON if that variable is set, otherwise the
- * query string on the URL is used. Supplying the exact URL from the APITxt
- * dashboard is the only step needed to go live, with no code change.
- */
+const REQUEST_TIMEOUT_MS = 12_000;
+
 export const apitxtProvider: SmsProvider = {
   name: "apitxt",
   async sendOtp(phone, code) {
-    if (!env.sms.requestUrl) {
-      return {
-        ok: false,
-        error:
-          "APITXT_REQUEST_URL is not configured. Add the APITxt send URL template to .env.",
-      };
+    if (!env.sms.apiKey) {
+      return { ok: false, error: "APITXT_API_KEY is not set.", retryable: false };
     }
 
-    const message = buildMessage(code);
-    const replacements: Record<string, string> = {
-      "{API_KEY}": env.sms.apiKey,
-      "{PHONE}": phone,
-      "{PHONE_NO_CC}": phoneWithoutCountryCode(phone),
-      "{MESSAGE}": message,
-      "{OTP}": code,
-      "{SENDER}": env.sms.senderId,
-      "{TEMPLATE_ID}": env.sms.templateId,
-    };
-
-    let url = env.sms.requestUrl;
-    for (const [token, value] of Object.entries(replacements)) {
-      url = url.replaceAll(token, encodeURIComponent(value));
-    }
+    const { url, body } = buildOtpRequest(
+      {
+        endpoint: env.sms.endpoint || APITXT_ENDPOINT,
+        authKey: env.sms.apiKey,
+        channel: env.sms.channel,
+        templateId: env.sms.templateId || undefined,
+        country: env.sms.country || undefined,
+      },
+      phone,
+      code,
+    );
 
     try {
       const response = await fetch(url, {
-        method: env.sms.requestMethod === "POST" ? "POST" : "GET",
-        headers: { Accept: "application/json" },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body,
         cache: "no-store",
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
 
       const text = await response.text();
-      if (!response.ok) {
-        return { ok: false, error: `APITxt responded ${response.status}: ${text.slice(0, 300)}` };
+      const outcome = interpretResponse(response.status, text);
+
+      if (!outcome.ok) {
+        // The key and the code never reach the log.
+        console.error(`[sms:apitxt] send failed (${outcome.code ?? "no code"}): ${outcome.error}`);
+        return { ok: false, error: outcome.error, retryable: outcome.retryable };
       }
-      return { ok: true, providerId: text.slice(0, 120) };
+
+      return { ok: true, providerId: outcome.requestId };
     } catch (error) {
-      return { ok: false, error: error instanceof Error ? error.message : "SMS request failed" };
+      const message =
+        error instanceof Error && error.name === "TimeoutError"
+          ? "The SMS provider did not respond in time."
+          : error instanceof Error
+            ? error.message
+            : "SMS request failed";
+      console.error(`[sms:apitxt] ${message}`);
+      return { ok: false, error: message, retryable: true };
     }
   },
 };
