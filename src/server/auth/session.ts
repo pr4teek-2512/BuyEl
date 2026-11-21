@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import { prisma } from "@/server/db";
 import { env } from "@/lib/env";
@@ -87,9 +88,23 @@ export const getCurrentUser = cache(async () => {
   return session.user;
 });
 
+/**
+ * For server actions. Throws so the action can turn it into a message the
+ * form shows, rather than redirecting mid submit.
+ */
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHENTICATED");
+  return user;
+}
+
+/**
+ * For pages. A session that expired between the layout and the page should
+ * send the student to sign in again, not show them an error screen.
+ */
+export async function requireUserForPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
   return user;
 }
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
-import { requireUser } from "@/server/auth/session";
+import { requireUserForPage } from "@/server/auth/session";
 import { ChatError, getConversation } from "@/server/services/chat.service";
 import {
   listActivePlatforms,
@@ -21,7 +21,7 @@ export default async function ConversationPage({
 }: {
   params: Promise<{ threadId: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireUserForPage();
   const { threadId } = await params;
 
   let conversation;

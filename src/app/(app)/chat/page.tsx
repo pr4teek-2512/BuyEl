@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
-import { requireUser } from "@/server/auth/session";
+import { requireUserForPage } from "@/server/auth/session";
 import { listThreads } from "@/server/services/chat.service";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState, PageHeading } from "@/components/ui/Primitives";
@@ -18,7 +18,7 @@ export default async function ChatPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireUserForPage();
   const params = await searchParams;
   const tab = TABS.find((t) => t.key === params.tab)?.key ?? "buy";
 

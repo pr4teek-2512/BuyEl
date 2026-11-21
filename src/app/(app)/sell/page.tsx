@@ -1,4 +1,4 @@
-import { requireUser } from "@/server/auth/session";
+import { requireUserForPage } from "@/server/auth/session";
 import { listSellerListings } from "@/server/services/listing.service";
 import {
   listActivePlatforms,
@@ -18,7 +18,7 @@ function shortDate(date: Date) {
 }
 
 export default async function SellPage() {
-  const user = await requireUser();
+  const user = await requireUserForPage();
   const [listings, unlockPlans, boostPlans, platforms] = await Promise.all([
     listSellerListings(user.id),
     listPayablePlans("seller_chat_unlock"),

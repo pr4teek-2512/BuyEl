@@ -1,5 +1,5 @@
 import { Coins } from "lucide-react";
-import { requireUser } from "@/server/auth/session";
+import { requireUserForPage } from "@/server/auth/session";
 import {
   listActivePlatforms,
   listPayablePlans,
@@ -14,7 +14,7 @@ import { formatRupees } from "@/lib/text";
 export const metadata = { title: "Credits - BuyEl" };
 
 export default async function PaymentsPage() {
-  const user = await requireUser();
+  const user = await requireUserForPage();
 
   const [plans, platforms, history, pending] = await Promise.all([
     listPayablePlans("credits"),

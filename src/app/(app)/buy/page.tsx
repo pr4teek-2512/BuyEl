@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/server/auth/session";
+import { requireUserForPage } from "@/server/auth/session";
 import { fetchListingPage } from "@/server/services/ordering.service";
 import { buildFeedFilters } from "@/server/services/ordering.rules";
 import { existingThreadListingIds } from "@/server/services/chat.service";
@@ -21,7 +21,7 @@ export default async function BuyPage({
 }: {
   searchParams: Promise<{ tab?: string; college?: string; course?: string; page?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireUserForPage();
   const params = await searchParams;
 
   const tab = TABS.find((t) => t.key === params.tab)?.key ?? "available";
