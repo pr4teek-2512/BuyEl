@@ -271,6 +271,23 @@ its "Sold out" badge, since no chat button exists there. Self chat was already b
 `chat.service.ts`, so nothing new was needed server side. Verified in the browser at desktop
 and mobile widths with test account one.
 
+## Scrolling course names (2026-11-22)
+
+Long course names in the Buy feed and the landing search scroll instead of truncating.
+`src/components/ui/Marquee.tsx` measures `scrollWidth` against the row width on the client
+and only animates when the name actually overflows; the keyframes live in `globals.css` as
+`buyel-marquee`, easing to the end, pausing, and alternating back. Two gaps were closed
+afterwards: the ResizeObserver now watches the text node as well as the row and re-measures
+on `document.fonts.ready`, since the first measurement happens in the fallback font, and
+under `prefers-reduced-motion` the span falls back to `display: inline` so the old ellipsis
+returns rather than a name clipped mid letter.
+
+Verified at 375px: overflowing names (Microprocessors EC305, Maths MA101 expired boost)
+sweep to their tail and back while short ones sit still. Note for future sessions: the long
+running dev server was serving a stale CSS bundle that predated the keyframes, so the
+animation looked dead until `globals.css` was touched again. Restart `next dev` if a new
+rule in that file appears to do nothing.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
