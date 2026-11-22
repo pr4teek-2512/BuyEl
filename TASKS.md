@@ -200,6 +200,12 @@ Also fixed while hardening:
 
 ---
 
+## Chat retention
+
+- [x] Daily sweep deletes chats inactive for 14 days from lists over 10 chats
+- [x] Daily sweep trims every chat to its newest 100 messages
+- [ ] Owner decision: should a buyer pay again after a swept chat is reopened
+
 ## Blocked right now
 
 | Task | Question |

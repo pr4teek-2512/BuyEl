@@ -319,6 +319,36 @@ Measured at 375x812: the card sits at x=16 with equal gaps above and below and a
 radius on all four corners. The listings e2e spec passes on both the desktop and mobile
 projects.
 
+## Chat retention (2026-11-22)
+
+A daily sweep now keeps chat storage bounded. `retention.rules.ts` holds the two rules as
+pure functions and `retention.service.ts` turns them into queries, the same split the
+ordering engine uses.
+
+Rule 1: a Buy list or a Sell list holding more than 10 chats loses every chat with no
+message in the last 14 days. The two lists are counted separately, and a chat with no
+messages at all is dated from when it was opened. The limit is a trigger, not a floor, so a
+sweep can take a list below 10.
+
+Rule 2: each chat keeps its newest 100 messages. It runs on the daily sweep rather than on
+every message, so a busy chat may sit above 100 until the next run. The messages to keep
+are named by id instead of cut on a timestamp, so two messages written in the same
+millisecond cannot push each other out.
+
+Both deletions are hard deletes; messages go with their thread through the cascade on
+`messages.thread_id`. The route is `/api/cron/sweep-chats`, guarded by CRON_SECRET like the
+boost sweep, scheduled at 20:30 in vercel.json.
+
+Open question for the owner: a buyer pays one credit per listing, and the proof of payment
+is the thread row itself (`chat_threads.buyer_credit_entry_id`, with the ledger's ref_id
+pointing at the thread). Once a thread is swept, that buyer is charged again if they reopen
+the same listing. That may be intended after 14 days of silence; if not, the ledger entry
+needs to carry the listing id so `openChat` can see the earlier payment.
+
+Verified against the dev database with throwaway fixtures: a 12 chat list lost its 5 stale
+chats and kept the 7 recent ones, and a 120 message chat came back with exactly its newest
+100. The fixtures were deleted afterwards and the database is back to its seeded state.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
