@@ -276,7 +276,9 @@ and mobile widths with test account one.
 Long course names in the Buy feed and the landing search scroll instead of truncating.
 `src/components/ui/Marquee.tsx` measures `scrollWidth` against the row width on the client
 and only animates when the name actually overflows; the keyframes live in `globals.css` as
-`buyel-marquee`, easing to the end, pausing, and alternating back. Two gaps were closed
+`buyel-marquee`: a short hold at the start, a steady linear travel to the end, a brief hold
+there, then a snap back to the start for the next pass. It never scrolls backwards, so the
+name always reads left to right. Two gaps were closed
 afterwards: the ResizeObserver now watches the text node as well as the row and re-measures
 on `document.fonts.ready`, since the first measurement happens in the fallback font, and
 under `prefers-reduced-motion` the span falls back to `display: inline` so the old ellipsis
