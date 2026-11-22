@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { deleteListing, signIn, TEST_ACCOUNTS, uniqueCourse } from "./helpers";
+import { deleteListing, listCourse, signIn, TEST_ACCOUNTS, uniqueCourse } from "./helpers";
 
 test.describe("listings", () => {
   test("a new listing is free, lands at the bottom, and appears to other students", async ({
@@ -10,21 +10,19 @@ test.describe("listings", () => {
     await signIn(page, TEST_ACCOUNTS.one);
     await page.goto("/sell");
 
-    await page.getByRole("button", { name: "List a course" }).click();
-    await page.getByLabel("Course", { exact: true }).fill(course);
-    await page.getByLabel("Price", { exact: true }).fill("777");
-    await page.getByRole("button", { name: "Confirm listing" }).click();
-
-    await expect(page.getByText("Listing created")).toBeVisible();
+    await listCourse(page, course, "777");
 
     const card = page.locator("li", { hasText: course }).first();
     await expect(card).toBeVisible();
     // Brand new, so it sits at the bottom of its college.
     await expect(card.getByText(/^#\d+$/)).toBeVisible();
 
-    // The seller does not see their own listing on Buy.
+    // The seller sees their own listing on Buy, marked You instead of a chat button.
     await page.goto("/buy");
-    await expect(page.getByText(course)).toHaveCount(0);
+    const ownRow = page.locator("li", { hasText: course }).first();
+    await expect(ownRow).toBeVisible();
+    await expect(ownRow.getByText("You")).toBeVisible();
+    await expect(ownRow.getByRole("button", { name: "Chat" })).toHaveCount(0);
 
     await deleteListing(page, course);
   });
@@ -34,11 +32,7 @@ test.describe("listings", () => {
 
     await signIn(page, TEST_ACCOUNTS.one);
     await page.goto("/sell");
-    await page.getByRole("button", { name: "List a course" }).click();
-    await page.getByLabel("Course", { exact: true }).fill(course);
-    await page.getByLabel("Price", { exact: true }).fill("300");
-    await page.getByRole("button", { name: "Confirm listing" }).click();
-    await expect(page.getByText("Listing created")).toBeVisible();
+    await listCourse(page, course, "300");
 
     const card = page.locator("li", { hasText: course }).first();
 
@@ -55,11 +49,7 @@ test.describe("listings", () => {
 
     await signIn(page, TEST_ACCOUNTS.one);
     await page.goto("/sell");
-    await page.getByRole("button", { name: "List a course" }).click();
-    await page.getByLabel("Course", { exact: true }).fill(course);
-    await page.getByLabel("Price", { exact: true }).fill("100");
-    await page.getByRole("button", { name: "Confirm listing" }).click();
-    await expect(page.getByText("Listing created")).toBeVisible();
+    await listCourse(page, course, "100");
 
     const card = page.locator("li", { hasText: course }).first();
     await card.getByLabel("Price (rupees)").fill("250");
@@ -75,11 +65,7 @@ test.describe("listings", () => {
 
     await signIn(page, TEST_ACCOUNTS.one);
     await page.goto("/sell");
-    await page.getByRole("button", { name: "List a course" }).click();
-    await page.getByLabel("Course", { exact: true }).fill(course);
-    await page.getByLabel("Price", { exact: true }).fill("150");
-    await page.getByRole("button", { name: "Confirm listing" }).click();
-    await expect(page.getByText("Listing created")).toBeVisible();
+    await listCourse(page, course, "150");
 
     const card = page.locator("li", { hasText: course }).first();
 

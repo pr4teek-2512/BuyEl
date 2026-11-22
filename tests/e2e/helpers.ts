@@ -38,6 +38,22 @@ export async function signInAdmin(page: Page) {
   await page.waitForURL("**/admin");
 }
 
+/**
+ * Lists a course through the popup and dismisses the share popup that follows,
+ * leaving the page ready to work with the new card.
+ */
+export async function listCourse(page: Page, course: string, price: string) {
+  await page.getByRole("button", { name: "List a course" }).click();
+  await page.getByLabel("Course", { exact: true }).fill(course);
+  await page.getByLabel("Price", { exact: true }).fill(price);
+  await page.getByRole("button", { name: "Confirm listing" }).click();
+
+  // The share popup is the confirmation that the listing was created.
+  await expect(page.getByText("Listing created")).toBeVisible();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("Listing created")).toHaveCount(0);
+}
+
 /** A course name nothing else will collide with. */
 export function uniqueCourse(prefix = "E2E Course") {
   return `${prefix} ${Date.now().toString().slice(-8)}`;
