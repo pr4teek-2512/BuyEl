@@ -99,8 +99,8 @@ export function Conversation({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex min-h-[40vh] flex-col gap-2 rounded-2xl border border-line bg-surface-soft p-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded-2xl border border-line bg-surface-soft p-3">
         {messages.length === 0 ? (
           <p className="m-auto max-w-xs text-center text-sm text-ink-muted">
             No messages yet. Say hello and ask about the course.
@@ -141,7 +141,10 @@ export function Conversation({
         </p>
       ) : null}
 
-      <form onSubmit={send} className="flex gap-2">
+      <form
+        onSubmit={send}
+        className="flex shrink-0 gap-2 pb-[env(safe-area-inset-bottom)]"
+      >
         <input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}

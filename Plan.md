@@ -243,6 +243,13 @@ them again. Point it at a scratch database before running it near production dat
 Admin sign in is throttled to 10 attempts per 15 minutes. The suite signs in once in a setup
 project and reuses the session, because signing in per test locked itself out.
 
+## Conversation page layout (2026-11-22)
+
+The conversation page (`chat/[threadId]`) is now a full screen view: a `fixed inset-0 z-50`
+container covers the app header and mobile nav, the message list scrolls inside it, and the
+input bar sits at the bottom edge (with safe area padding). The shell itself is unchanged.
+Not yet checked in a browser, since it needs a signed in session.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:

@@ -43,8 +43,9 @@ export default async function ConversationPage({
     : [[], [], null];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
+    <div className="fixed inset-0 z-50 bg-white">
+    <div className="mx-auto flex h-dvh w-full max-w-3xl flex-col gap-3 px-4 pb-3 pt-3">
+      <div className="flex shrink-0 items-center gap-3">
         <Link
           href={`/chat?tab=${role === "buyer" ? "buy" : "sell"}`}
           className="text-ink-muted hover:text-ink"
@@ -62,7 +63,7 @@ export default async function ConversationPage({
       </div>
 
       {view.locked ? (
-        <Card className="flex flex-col items-start gap-3">
+        <Card className="flex flex-col items-start gap-3 overflow-y-auto">
           <span className="inline-flex size-10 items-center justify-center rounded-full bg-brand-soft text-brand">
             <Lock className="size-5" />
           </span>
@@ -109,6 +110,7 @@ export default async function ConversationPage({
       ) : (
         <Conversation threadId={threadId} initialMessages={messages} />
       )}
+    </div>
     </div>
   );
 }
