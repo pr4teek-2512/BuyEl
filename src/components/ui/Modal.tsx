@@ -5,9 +5,13 @@ import type { ReactNode } from "react";
 import { X } from "lucide-react";
 
 /**
- * The popup shell the app uses everywhere: a bottom sheet on a phone, a
- * centred card from the small breakpoint up. Same chrome as the payment
- * popup, so every dialog in the app looks and closes the same way.
+ * The popup shell the app uses everywhere: a rounded box floating in the
+ * middle of the screen, at every width, phones included. Never a sheet stuck
+ * to an edge.
+ *
+ * Every popup in the app goes through this component, and any new one must
+ * too, so they all look, scroll and close the same way. Do not hand roll an
+ * overlay next to it.
  */
 export function Modal({
   title,
@@ -30,12 +34,12 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/40 p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
-      <div className="animate-fade-up max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 sm:rounded-2xl">
+      <div className="animate-fade-up my-auto max-h-[88dvh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-5 shadow-xl shadow-ink/10">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold">{title}</h2>

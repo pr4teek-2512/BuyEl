@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { CheckCircle2, Download, Info, X } from "lucide-react";
+import { CheckCircle2, Download, Info } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { inputClasses } from "@/components/ui/Field";
+import { Modal } from "@/components/ui/Modal";
 import { cn } from "@/lib/cn";
 import { formatRupees } from "@/lib/text";
 import { submitPaymentAction } from "@/app/(app)/payments/actions";
@@ -59,58 +60,31 @@ export function PaymentDialog({
   const [platform, setPlatform] = useState<PaymentPlatformOption | null>(null);
   const [state, submit] = useActionState(submitPaymentAction, initialPaymentState);
 
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   const step2 = plan !== null && platform !== null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 sm:items-center sm:p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
-      <div className="animate-fade-up max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 sm:rounded-2xl">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 className="text-lg font-semibold">{state.status === "submitted" ? "Request sent" : title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-ink-muted hover:text-ink"
-            aria-label="Close"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
-
-        {state.status === "submitted" ? (
-          <Submitted onClose={onClose} />
-        ) : !step2 ? (
-          <StepOne
-            plans={plans}
-            platforms={platforms}
-            plan={plan}
-            onPickPlan={setPlan}
-            onPickPlatform={setPlatform}
-          />
-        ) : (
-          <StepTwo
-            plan={plan}
-            platform={platform}
-            listingId={listingId}
-            submit={submit}
-            error={state.error}
-            onBack={() => setPlatform(null)}
-          />
-        )}
-      </div>
-    </div>
+    <Modal title={state.status === "submitted" ? "Request sent" : title} onClose={onClose}>
+      {state.status === "submitted" ? (
+        <Submitted onClose={onClose} />
+      ) : !step2 ? (
+        <StepOne
+          plans={plans}
+          platforms={platforms}
+          plan={plan}
+          onPickPlan={setPlan}
+          onPickPlatform={setPlatform}
+        />
+      ) : (
+        <StepTwo
+          plan={plan}
+          platform={platform}
+          listingId={listingId}
+          submit={submit}
+          error={state.error}
+          onBack={() => setPlatform(null)}
+        />
+      )}
+    </Modal>
   );
 }
 
@@ -219,7 +193,7 @@ function StepOne({
 function PayButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="lg" fullWidth loading={pending}>
+    <Button type="submit" size="lg" className="flex-1" loading={pending}>
       Submit payment
     </Button>
   );
@@ -322,10 +296,10 @@ function StepTwo({
         ) : null}
 
         <div className="flex gap-2">
-          <Button type="button" variant="secondary" size="lg" onClick={onBack}>
+          <PayButton />
+          <Button type="button" variant="secondary" size="lg" className="flex-1" onClick={onBack}>
             Back
           </Button>
-          <PayButton />
         </div>
       </form>
     </div>

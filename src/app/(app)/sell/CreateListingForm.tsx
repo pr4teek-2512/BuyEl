@@ -13,7 +13,7 @@ import { initialSellState, type SellFormState } from "./state";
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="lg" fullWidth loading={pending}>
+    <Button type="submit" size="lg" className="flex-1" loading={pending}>
       Confirm listing
     </Button>
   );
@@ -101,7 +101,13 @@ export function CreateListingForm({ defaultCollege }: { defaultCollege: string }
 
             <div className="flex gap-2">
               <SubmitButton />
-              <Button type="button" variant="secondary" size="lg" onClick={() => setOpen(false)}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                className="flex-1"
+                onClick={() => setOpen(false)}
+              >
                 Cancel
               </Button>
             </div>
