@@ -6,7 +6,7 @@ import {
   pendingRequestFor,
 } from "@/server/services/payment.service";
 import { describePlan } from "@/server/services/payment.rules";
-import { EmptyState, PageHeading } from "@/components/ui/Primitives";
+import { EmptyState } from "@/components/ui/Primitives";
 import { CreateListingForm } from "./CreateListingForm";
 import { SellListingCard } from "./SellListingCard";
 
@@ -61,11 +61,6 @@ export default async function SellPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeading
-        title="Sell"
-        description="List a course you have registered for. Listing is always free."
-      />
-
       <CreateListingForm defaultCollege={user.collegeText} />
 
       {listings.length === 0 ? (

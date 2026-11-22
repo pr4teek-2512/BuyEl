@@ -3,7 +3,7 @@ import { requireUserForPage } from "@/server/auth/session";
 import { fetchListingPage } from "@/server/services/ordering.service";
 import { buildFeedFilters } from "@/server/services/ordering.rules";
 import { existingThreadListingIds } from "@/server/services/chat.service";
-import { EmptyState, PageHeading } from "@/components/ui/Primitives";
+import { EmptyState } from "@/components/ui/Primitives";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { cn } from "@/lib/cn";
 import { BuySearch } from "./BuySearch";
@@ -57,9 +57,7 @@ export default async function BuyPage({
 
   return (
     <div className="flex flex-col gap-4">
-      <PageHeading title="Buy" description="Course seats listed by other students." />
-
-      <nav className="flex gap-1 border-b border-line">
+      <nav className="grid grid-cols-2 border-b border-line">
         {TABS.map((item) => {
           const active = item.key === tab;
           const query = new URLSearchParams({ tab: item.key });
@@ -71,7 +69,7 @@ export default async function BuyPage({
               key={item.key}
               href={`/buy?${query.toString()}`}
               className={cn(
-                "border-b-2 px-3 py-2 text-sm transition-colors",
+                "border-b-2 px-3 py-2 text-center text-sm transition-colors",
                 active
                   ? "border-brand font-medium text-brand"
                   : "border-transparent text-ink-soft hover:text-ink",
