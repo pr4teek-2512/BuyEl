@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/sweep-boosts",
       "schedule": "0 20 * * *"
+    },
+    {
+      "path": "/api/cron/sweep-chats",
+      "schedule": "30 20 * * *"
     }
   ]
 }
