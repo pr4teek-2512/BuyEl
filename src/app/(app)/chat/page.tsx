@@ -31,13 +31,13 @@ export default async function ChatPage({
         description="Names and numbers are never shown. You both see only initials."
       />
 
-      <nav className="flex gap-1 border-b border-line">
+      <nav className="grid grid-cols-2 border-b border-line">
         {TABS.map((item) => (
           <Link
             key={item.key}
             href={`/chat?tab=${item.key}`}
             className={cn(
-              "border-b-2 px-3 py-2 text-sm transition-colors",
+              "border-b-2 px-3 py-2 text-center text-sm transition-colors",
               item.key === tab
                 ? "border-brand font-medium text-brand"
                 : "border-transparent text-ink-soft hover:text-ink",
