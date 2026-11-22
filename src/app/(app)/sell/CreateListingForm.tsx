@@ -26,9 +26,18 @@ export function CreateListingForm({ defaultCollege }: { defaultCollege: string }
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} fullWidth size="lg">
-        List a course
-      </Button>
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-30 sm:bottom-6">
+        <div className="mx-auto w-full max-w-3xl px-4">
+          <Button
+            onClick={() => setOpen(true)}
+            fullWidth
+            size="lg"
+            className="pointer-events-auto shadow-lg"
+          >
+            List a course
+          </Button>
+        </div>
+      </div>
     );
   }
 

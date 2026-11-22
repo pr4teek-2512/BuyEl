@@ -60,7 +60,7 @@ export default async function SellPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 pb-20">
       <CreateListingForm defaultCollege={user.collegeText} />
 
       {listings.length === 0 ? (
