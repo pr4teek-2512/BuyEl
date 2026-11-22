@@ -45,13 +45,13 @@ export function ListingCard({
       {soldOut ? (
         <Badge tone="neutral">Sold out</Badge>
       ) : isOwn ? (
-        <span className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-line bg-surface-soft px-3 text-sm font-medium text-ink-soft">
+        <span className="inline-flex h-9 w-[5.5rem] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface-soft px-3 text-sm font-medium text-ink-soft">
           <User className="size-4" />
           You
         </span>
       ) : (
         (action ?? (
-          <span className="inline-flex items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm text-ink-muted">
+          <span className="inline-flex h-9 w-[5.5rem] shrink-0 items-center justify-center gap-1.5 rounded-lg border border-line px-3 text-sm text-ink-muted">
             <MessageSquare className="size-4" />
             Chat
           </span>

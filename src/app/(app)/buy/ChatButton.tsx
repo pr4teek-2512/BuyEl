@@ -11,7 +11,7 @@ import { initialChatButtonState } from "./state";
 function Submit({ alreadyOpen }: { alreadyOpen: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="sm" variant="secondary" loading={pending}>
+    <Button type="submit" size="sm" variant="secondary" loading={pending} className="w-[5.5rem]">
       <MessageSquare className="size-4" />
       {alreadyOpen ? "Open" : "Chat"}
     </Button>
