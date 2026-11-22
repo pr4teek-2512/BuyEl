@@ -306,6 +306,19 @@ The success message no longer renders inline on the Sell page, so the e2e suite 
 that a seller cannot see their own listing on Buy was left over from the previous change
 and now checks for the "You" marker instead.
 
+## Popups are centred boxes (2026-11-22)
+
+Popups no longer stick to the bottom edge on phones. `src/components/ui/Modal.tsx` centres
+a rounded box at every width, with a 16px gutter, `max-h-[88dvh]` and its own scrolling,
+and the payment popup now renders through that same shell instead of repeating the overlay
+markup, so there is one popup implementation in the app. Footer buttons inside a popup are
+`flex-1` so they match in width, confirming action on the left, dismissing one on the
+right. The rule is written down in `CLAUDE.md` so later work keeps to it.
+
+Measured at 375x812: the card sits at x=16 with equal gaps above and below and a 16px
+radius on all four corners. The listings e2e spec passes on both the desktop and mobile
+projects.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
