@@ -260,6 +260,17 @@ the account is seeded. Sign out lives here now instead of on the Sell page, so
 and the Playwright `signOut` helper goes to `/profile`. Verified in the browser with test
 account one: header avatar opens the page, details render, sign out returns to `/login`.
 
+## Own listings in the Buy feed (2026-11-22)
+
+A student now sees their own listings in the Buy feed and in the landing search, in their
+normal ranked position. `buildFeedFilters` no longer takes a `viewerId` and
+`ListingFilters.excludeSellerId` is gone, so one feed serves everyone. `ListingCard` takes
+`isOwn` and renders a "You" chip in the action slot, sized exactly like the Chat button
+(h-9, rounded-lg, same icon-and-label shape) so rows stay uniform. The sold out tab keeps
+its "Sold out" badge, since no chat button exists there. Self chat was already blocked in
+`chat.service.ts`, so nothing new was needed server side. Verified in the browser at desktop
+and mobile widths with test account one.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
