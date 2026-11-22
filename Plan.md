@@ -290,6 +290,22 @@ running dev server was serving a stale CSS bundle that predated the keyframes, s
 animation looked dead until `globals.css` was touched again. Restart `next dev` if a new
 rule in that file appears to do nothing.
 
+## Listing flow as popups (2026-11-22)
+
+"List a course" now opens the form in a popup instead of expanding the Sell page, and
+confirming it opens a second popup that offers the link to the new listing. The popup shell
+is `src/components/ui/Modal.tsx`, which copies the payment popup's chrome, so every dialog
+is a bottom sheet on a phone and a centred card from sm up. `ShareListingDialog` builds the
+link as `/?college=...&course=...#results`, the landing search that shows that course, and
+its Share button uses the Web Share sheet where the browser has one, falling back to the
+clipboard and then to a selection copy, since the clipboard API is refused when the
+document is not focused. Share and Cancel are both `flex-1` at size lg, Cancel to the right.
+
+The success message no longer renders inline on the Sell page, so the e2e suite got a
+`listCourse` helper that lists a course and dismisses the share popup. The old assertion
+that a seller cannot see their own listing on Buy was left over from the previous change
+and now checks for the "You" marker instead.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
