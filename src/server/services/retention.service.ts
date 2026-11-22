@@ -25,8 +25,14 @@ export type RetentionReport = {
  * quiet for more than the inactivity window.
  *
  * Buy lists and Sell lists are counted separately, because they are separate
- * lists to the person reading them. A chat has two sides, so deleting it
- * removes it from the other person's list as well.
+ * lists to the person reading them.
+ *
+ * A chat is one row shared by both sides, so deleting it removes it from the
+ * buyer's list and the seller's list at the same time. That holds even when
+ * the other side's list is well within the limit, or their chat is not stale
+ * by their own reckoning: one side's sweep ends the conversation for both.
+ * This is deliberate. Never soften it into a per side hide, which would leave
+ * a chat the other person can still write into while its counterpart is gone.
  */
 async function crowdedBuyers(): Promise<string[]> {
   const rows = await prisma.chatThread.groupBy({

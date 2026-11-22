@@ -330,6 +330,12 @@ message in the last 14 days. The two lists are counted separately, and a chat wi
 messages at all is dated from when it was opened. The limit is a trigger, not a floor, so a
 sweep can take a list below 10.
 
+A chat is one row shared by both sides, so a deletion always lands on both ends at once,
+even when the other person's list is nowhere near the limit. Confirmed with fixtures in
+both directions: a buyer with 12 chats swept 5 of them away from sellers who had a single
+chat each, and a seller with 12 chats did the same to four buyers who had one chat each.
+This is intended, so it must not be softened into a per side hide.
+
 Rule 2: each chat keeps its newest 100 messages. It runs on the daily sweep rather than on
 every message, so a busy chat may sit above 100 until the next run. The messages to keep
 are named by id instead of cut on a timestamp, so two messages written in the same

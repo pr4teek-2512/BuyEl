@@ -5,8 +5,9 @@
  *
  *  1. Once one side's chat list holds more than `CHAT_LIST_LIMIT` chats, every
  *     chat in that list with no message in the last `INACTIVE_DAYS` days is
- *     deleted for good. A list at or below the limit is left alone, however
- *     old its chats are.
+ *     deleted for good, for both people in it, whether or not the other side's
+ *     list is over the limit. A list at or below the limit is left alone,
+ *     however old its chats are.
  *  2. A chat keeps its newest `MESSAGES_PER_THREAD` messages. Anything older
  *     goes, permanently. This runs on a daily sweep rather than on every
  *     message, so a chat may sit above the limit until the next sweep.
