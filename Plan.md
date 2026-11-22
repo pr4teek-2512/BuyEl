@@ -250,6 +250,16 @@ container covers the app header and mobile nav, the message list scrolls inside 
 input bar sits at the bottom edge (with safe area padding). The shell itself is unchanged.
 Not yet checked in a browser, since it needs a signed in session.
 
+## Profile page (2026-11-22)
+
+The header avatar is now a link to `/profile`. The page (`src/app/(app)/profile/page.tsx`)
+shows every detail the student gave at sign up - first name, last name, phone, college,
+branch, graduation year - plus credit balance, member since, and a test account badge when
+the account is seeded. Sign out lives here now instead of on the Sell page, so
+`signOutAction` moved from `sell/actions.ts` to the shared `src/app/(app)/accountActions.ts`
+and the Playwright `signOut` helper goes to `/profile`. Verified in the browser with test
+account one: header avatar opens the page, details render, sign out returns to `/login`.
+
 ## Still open
 
 Full list in `PROJECT_PLAN.md` section 9. Nothing blocks phases 0, 1, 3 or 4. Outstanding:
