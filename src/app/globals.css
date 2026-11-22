@@ -66,6 +66,28 @@ body {
   display: none;
 }
 
+/* Long text drifts to its end, pauses, then drifts back. */
+@keyframes buyel-marquee {
+  0%,
+  20% {
+    transform: translateX(0);
+  }
+  80%,
+  100% {
+    transform: translateX(var(--marquee-distance));
+  }
+}
+
+.buyel-marquee {
+  animation: buyel-marquee var(--marquee-duration, 6s) ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buyel-marquee {
+    animation: none;
+  }
+}
+
 @keyframes buyel-fade-up {
   from {
     opacity: 0;

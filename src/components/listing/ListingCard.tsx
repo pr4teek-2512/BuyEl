@@ -1,5 +1,6 @@
 import { MessageSquare, User, Zap } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
+import { Marquee } from "@/components/ui/Marquee";
 import { Badge } from "@/components/ui/Primitives";
 import { formatRupees } from "@/lib/text";
 import type { ListingCard as ListingCardData } from "@/server/services/ordering.service";
@@ -29,7 +30,7 @@ export function ListingCard({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate font-medium text-ink">{listing.courseText}</p>
+          <Marquee className="min-w-0 font-medium text-ink">{listing.courseText}</Marquee>
           {listing.isBoosted ? (
             <Zap className="size-3.5 shrink-0 text-brand" aria-label="Boosted listing" />
           ) : null}
