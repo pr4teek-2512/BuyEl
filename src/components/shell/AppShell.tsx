@@ -49,7 +49,14 @@ export function AppHeader({
 
           <NotificationBell notifications={notifications} unreadCount={unreadCount} />
 
-          <Avatar initials={user.initials} size="sm" />
+          <Link
+            href="/profile"
+            aria-label="Your profile"
+            title="Your profile"
+            className="rounded-full ring-offset-2 transition-shadow hover:ring-2 hover:ring-brand focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            <Avatar initials={user.initials} size="sm" />
+          </Link>
         </div>
       </div>
 

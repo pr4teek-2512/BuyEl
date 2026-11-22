@@ -9,7 +9,6 @@ import { describePlan } from "@/server/services/payment.rules";
 import { EmptyState, PageHeading } from "@/components/ui/Primitives";
 import { CreateListingForm } from "./CreateListingForm";
 import { SellListingCard } from "./SellListingCard";
-import { SignOutButton } from "./SignOutButton";
 
 export const metadata = { title: "Sell - BuyEl" };
 
@@ -65,7 +64,6 @@ export default async function SellPage() {
       <PageHeading
         title="Sell"
         description="List a course you have registered for. Listing is always free."
-        action={<SignOutButton />}
       />
 
       <CreateListingForm defaultCollege={user.collegeText} />

@@ -25,7 +25,7 @@ export async function signIn(page: Page, account: { phone: string; otp: string }
 }
 
 export async function signOut(page: Page) {
-  await page.goto("/sell");
+  await page.goto("/profile");
   await page.getByRole("button", { name: "Sign out" }).click();
   await page.waitForURL("**/login");
 }

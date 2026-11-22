@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireUser, destroyUserSession } from "@/server/auth/session";
+import { requireUser } from "@/server/auth/session";
 import {
   closeListing,
   createListing,
@@ -109,7 +108,3 @@ export async function listingActionHandler(
   }
 }
 
-export async function signOutAction() {
-  await destroyUserSession();
-  redirect("/login");
-}
