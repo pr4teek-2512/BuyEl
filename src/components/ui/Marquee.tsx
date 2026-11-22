@@ -18,13 +18,19 @@ export function Marquee({ children, className }: { children: string; className?:
       setDistance(Math.max(0, text.current.scrollWidth - box.current.clientWidth));
     }
     measure();
+
+    // The row resizes, and so does the text itself once the web font replaces
+    // the fallback one. Measuring only the row leaves a stale distance behind.
     const observer = new ResizeObserver(measure);
     if (box.current) observer.observe(box.current);
+    if (text.current) observer.observe(text.current);
+    document.fonts?.ready.then(measure).catch(() => {});
+
     return () => observer.disconnect();
   }, [children]);
 
   return (
-    <div ref={box} className={cn("overflow-hidden whitespace-nowrap", className)}>
+    <div ref={box} className={cn("buyel-marquee-box overflow-hidden whitespace-nowrap", className)}>
       <span
         ref={text}
         className={cn("inline-block", distance > 0 && "buyel-marquee")}

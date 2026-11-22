@@ -82,9 +82,18 @@ body {
   animation: buyel-marquee var(--marquee-duration, 6s) ease-in-out infinite alternate;
 }
 
+/*
+  No animation means the name would sit clipped mid letter forever, so it falls
+  back to the ellipsis it had before. An inline span is what lets the ellipsis
+  render; the animated one has to be inline-block to take a transform.
+*/
 @media (prefers-reduced-motion: reduce) {
   .buyel-marquee {
     animation: none;
+    display: inline;
+  }
+  .buyel-marquee-box {
+    text-overflow: ellipsis;
   }
 }
 
