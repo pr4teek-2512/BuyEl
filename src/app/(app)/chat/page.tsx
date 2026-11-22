@@ -3,7 +3,7 @@ import { Lock } from "lucide-react";
 import { requireUserForPage } from "@/server/auth/session";
 import { listThreads } from "@/server/services/chat.service";
 import { Avatar } from "@/components/ui/Avatar";
-import { EmptyState, PageHeading } from "@/components/ui/Primitives";
+import { EmptyState } from "@/components/ui/Primitives";
 import { cn } from "@/lib/cn";
 
 export const metadata = { title: "Chat - BuyEl" };
@@ -25,11 +25,10 @@ export default async function ChatPage({
   const threads = await listThreads(user.id, tab === "buy" ? "buyer" : "seller");
 
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeading
-        title="Chat"
-        description="Names and numbers are never shown. You both see only initials."
-      />
+    <div className="flex flex-col gap-4 pb-12">
+      <p className="pointer-events-none fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom)+0.5rem)] z-30 px-4 text-center text-xs text-ink-muted sm:bottom-4">
+        Names and numbers are never shown. You both see only initials.
+      </p>
 
       <nav className="grid grid-cols-2 border-b border-line">
         {TABS.map((item) => (
