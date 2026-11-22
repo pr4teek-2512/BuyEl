@@ -137,21 +137,19 @@ export function rankFromAboveCount(aboveCount: number): number {
 /**
  * PRD section 14: the public landing search and the logged in Buy page must
  * return the same listings in the same order. Both build their filters here,
- * so the only possible difference is that a signed in student does not see
- * their own listings, which is what `viewerId` expresses.
+ * so the two surfaces cannot drift apart. A student's own listings stay in the
+ * feed and are marked "You" on the card instead of carrying a chat button.
  */
 export type FeedQuery = {
   college?: string | null;
   course?: string | null;
   status?: "active" | "closed";
-  viewerId?: string | null;
 };
 
 export type FeedFilters = {
   status: "active" | "closed";
   collegeText: string | null;
   courseText: string | null;
-  excludeSellerId: string | undefined;
 };
 
 export function buildFeedFilters(query: FeedQuery): FeedFilters {
@@ -159,6 +157,5 @@ export function buildFeedFilters(query: FeedQuery): FeedFilters {
     status: query.status ?? "active",
     collegeText: query.college?.trim() ? query.college.trim() : null,
     courseText: query.course?.trim() ? query.course.trim() : null,
-    excludeSellerId: query.viewerId ?? undefined,
   };
 }

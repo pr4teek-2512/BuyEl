@@ -37,14 +37,13 @@ export default async function BuyPage({
       status: tab === "available" ? "active" : "closed",
       college,
       course,
-      viewerId: user.id,
     }),
     page,
   );
 
   const openThreads = await existingThreadListingIds(
     user.id,
-    cards.map((card) => card.id),
+    cards.filter((card) => card.sellerId !== user.id).map((card) => card.id),
   );
 
   function hrefFor(next: Record<string, string | number>) {
@@ -105,6 +104,7 @@ export default async function BuyPage({
                 key={listing.id}
                 listing={listing}
                 soldOut={tab === "soldout"}
+                isOwn={listing.sellerId === user.id}
                 action={
                   tab === "available" ? (
                     <ChatButton

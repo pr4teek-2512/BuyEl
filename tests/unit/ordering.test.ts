@@ -274,18 +274,16 @@ describe("seller rank", () => {
 });
 
 describe("the public search and the Buy page share one feed", () => {
-  it("builds identical filters apart from hiding your own listings", async () => {
+  it("builds identical filters for a visitor and a signed in student", async () => {
     const { buildFeedFilters } = await import("@/server/services/ordering.rules");
 
-    const visitor = buildFeedFilters({ college: "DTU", course: "DBMS" });
-    const student = buildFeedFilters({ college: "DTU", course: "DBMS", viewerId: "user-1" });
-
-    expect({ ...visitor, excludeSellerId: undefined }).toEqual({
-      ...student,
-      excludeSellerId: undefined,
+    // Own listings are no longer filtered out of the feed. They stay in place
+    // and the card marks them "You" instead of offering a chat button.
+    expect(buildFeedFilters({ college: "DTU", course: "DBMS" })).toEqual({
+      status: "active",
+      collegeText: "DTU",
+      courseText: "DBMS",
     });
-    expect(visitor.excludeSellerId).toBeUndefined();
-    expect(student.excludeSellerId).toBe("user-1");
   });
 
   it("treats blank filters as no filter at all", () => {

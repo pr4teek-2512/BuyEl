@@ -23,7 +23,7 @@ export default async function LandingPage({
 
   // Exactly the same feed the Buy page uses, so results cannot drift apart.
   const results = searching
-    ? await fetchListingPage(buildFeedFilters({ college, course, viewerId: user?.id }), page)
+    ? await fetchListingPage(buildFeedFilters({ college, course }), page)
     : null;
 
   function hrefFor(nextPage: number) {
@@ -88,6 +88,7 @@ export default async function LandingPage({
                     <ListingCard
                       key={listing.id}
                       listing={listing}
+                      isOwn={Boolean(user) && listing.sellerId === user?.id}
                       action={
                         <Link href={user ? "/buy" : "/login"}>
                           <Button size="sm" variant="secondary">

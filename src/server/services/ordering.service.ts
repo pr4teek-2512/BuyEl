@@ -17,8 +17,6 @@ export type ListingFilters = {
   courseId?: string | null;
   courseText?: string | null;
   status?: "active" | "closed";
-  /** Excluded so a seller never sees their own listing on the Buy page. */
-  excludeSellerId?: string;
 };
 
 export type ListingCard = {
@@ -69,10 +67,6 @@ function baseWhere(filters: ListingFilters, now: Date): Prisma.ListingWhereInput
   const where: Prisma.ListingWhereInput = {
     status: filters.status ?? "active",
   };
-
-  if (filters.excludeSellerId) {
-    where.sellerId = { not: filters.excludeSellerId };
-  }
 
   if (filters.collegeId) {
     where.collegeId = filters.collegeId;
