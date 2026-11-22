@@ -5,7 +5,10 @@ test.describe("signing in", () => {
   test("a test account signs in with its fixed code and lands on Buy", async ({ page }) => {
     await signIn(page, TEST_ACCOUNTS.one);
 
-    await expect(page.getByRole("heading", { name: "Buy", exact: true })).toBeVisible();
+    // The page headings were dropped from the app shell, so the tabs and the
+    // credit chip are what say the Buy page is really there.
+    await expect(page).toHaveURL(/\/buy/);
+    await expect(page.getByRole("link", { name: "Available" })).toBeVisible();
     await expect(page.getByRole("link", { name: /credits/ })).toBeVisible();
   });
 
